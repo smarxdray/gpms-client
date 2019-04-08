@@ -43,14 +43,14 @@ export default {
       { 
         key: 'to-all-students',
         name: '全体学生',
-        roles: ['admin'] 
+        roles: ['admin']
       },
       { 
         key: 'to-my-students',
         name: '我的学生',
         roles: ['teacher']
       },
-      { 
+      {
         key: 'to-a-teacher',
         name: '导师私信',
         roles: ['admin', 'student']
@@ -61,13 +61,9 @@ export default {
         roles: ['admin', 'teacher']
       }
     ]
-    let platformsOptions = allPlatformsOptions.filter(p => {
-      let valid = false
-      this.roles.forEach(r => {
-        valid = p.roles.includes(r) ? true : valid
-      })
-      return valid
-    })
+    let platformsOptions = allPlatformsOptions.filter(
+      p => this.roles.some(r => p.roles.includes(r))
+    )
     return {
       platformsOptions
     }

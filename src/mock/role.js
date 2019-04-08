@@ -24,11 +24,17 @@ const roles = [
     description: 'Normal Student. Can see all pages except permission page',
     routes: filterAsyncRoutes(routes, ['student'])
   },
+  // {
+  //   key: 'editor',
+  //   name: 'editor',
+  //   description: 'Normal Editor. Can see all pages except permission page',
+  //   routes: filterAsyncRoutes(routes, ['editor'])
+  // },
   {
-    key: 'editor',
-    name: 'editor',
-    description: 'Normal Editor. Can see all pages except permission page',
-    routes: filterAsyncRoutes(routes, ['editor'])
+    key: 'forbidden',
+    name: 'forbidden',
+    description: 'Forbidden account. Have no access to view any pages.',
+    routes: []
   },
   {
     key: 'visitor',

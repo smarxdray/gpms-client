@@ -15,7 +15,7 @@
       <dnd-list :list1="studentsAlloted" :list2="studentsRest" :list1-title="list1Title" list2-title="待分配学生" />
       <div style="text-align:right;">
         <!-- <el-button type="danger" @click="dialogVisible=false">{{ $t('permission.cancel') }}</el-button> -->
-        <el-button type="primary" @click="confirmRole">{{ $t('permission.confirm') }}</el-button>
+        <el-button type="primary" @click="confirm">{{ $t('permission.confirm') }}</el-button>
       </div>
     </div>
   </div>
@@ -23,7 +23,7 @@
 
 <script>
 import DndList from '@/components/DndList'
-import { getTeachers, getStudents } from '@/api/user'
+import { getTeachers, getStudentsWithoutTeacher } from '@/api/user'
 import i18n from "@/lang"
 
 export default {
@@ -50,13 +50,16 @@ export default {
   methods: {
     getData() {
       this.listLoading = true
-      getTeachers().then(response => {
-        this.teacherList = response.data
+      getTeachers().then(res => {
+        const body = res.data;
+        this.teacherList = body.data;
       })
-      getStudents().then(response => {
-        this.studentsRest = response.data
+      getStudentsWithoutTeacher().then(res => {
+        const body = res.data;
+        this.studentsRest = body.data;
       })
-    }
+    },
+    confirm() {}
   }
 }
 </script>

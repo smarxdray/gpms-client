@@ -91,7 +91,7 @@ export default {
     addRole: '新增角色',
     editPermission: '编辑权限',
     addAccount: '新增用户',
-    editAccount: '账户设置',
+    editAccount: '编辑账户',
     roles: '你的权限',
     switchRoles: '切换权限',
     tips: '在某些情况下，不适合使用 v-permission。例如：Element-UI 的 Tab 组件或 el-table-column 以及其它动态渲染 dom 的场景。你只能通过手动设置 v-if 来实现。',

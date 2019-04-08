@@ -40,3 +40,15 @@ export function numberFormatter(num, digits) {
 export function toThousandFilter(num) {
   return (+num || 0).toString().replace(/^-?\d+/g, m => m.replace(/(?=(?!\b)(\d{3})+$)/g, ','))
 }
+
+export function roleFilter(id, list) {
+  let role = list.filter(r => r.id == id)
+  if (role) return role.name;
+  else return ''
+}
+
+export function statusFilter(id, list) {
+  let status = list.filter(s => s.id = id)
+  if (status) return status.name;
+  else return ''
+}

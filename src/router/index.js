@@ -112,24 +112,24 @@ export default new Router({
 })
 
 export const asyncRoutes = [
-  {
-    path: '/role',
-    component: Layout,
-    redirect: 'role/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/permission/role'),
-        name: 'RolePermission',
-        meta: {
-          title: 'rolePermission',
-          icon: 'lock',
-          // roles: ['admin']
-        }
-      }
-    ]
+  // {
+  //   path: '/role',
+  //   component: Layout,
+  //   redirect: 'role/index',
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/permission/role'),
+  //       name: 'RolePermission',
+  //       meta: {
+  //         title: 'rolePermission',
+  //         icon: 'lock',
+  //         // roles: ['admin']
+  //       }
+  //     }
+  //   ]
 
-  },
+  // },
   // {
   //   path: '/permission',
   //   component: Layout,
@@ -249,7 +249,7 @@ export const asyncRoutes = [
         name: 'Notify',
         meta: {
           title: '公告发布',
-          icon: 'guide',
+          icon: 'edit',
           // roles: ['admin', 'teacher']
         }
       }
