@@ -7,7 +7,7 @@
           <span>{{ scope.row.code }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Role Name" width="150">
+      <el-table-column align="center" label="Name" width="150">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
       <el-table-column align="header-center" label="Description">
@@ -127,6 +127,7 @@ import path from "path";
 import { deepClone } from "@/utils";
 import { statusFilter, roleFilter } from "@/filters"
 import { getUsers, addUser, updateUser, deleteUser } from "@/api/user";
+import { getRoles } from "@/api/role"
 import i18n from "@/lang";
 
 const defaultUser = {
@@ -150,6 +151,7 @@ const defaultUser = {
 export default {
   data() {
     return {
+      // roleList: [],
       userList: [],
       user: Object.assign({}, defaultUser),
       statusList: [
@@ -175,6 +177,25 @@ export default {
     }
   },
   created() {
+    
+    this.$store.dispatch("GetRoleList").then(
+      res => {
+        const body = res.data;
+        const roles = body.data;
+        let success = roles.length > 0;
+        if (!success)
+          this.$notify({
+            message: body.msg,
+            type: "warning"
+          });
+      },
+      err => {
+        this.$notify.error({
+          title: "请求错误",
+          message: err
+        });
+      }
+    );
     this.getUsers();
   },
   computed: {
@@ -183,6 +204,10 @@ export default {
     }
   },
   methods: {
+    // async getRoles() {
+    //   const res = await getRoles();
+    //   this.roleList = res.data;
+    // },
     async getUsers() {
       const res = await getUsers();
       this.userList = res.data.data;
@@ -234,7 +259,7 @@ export default {
           );
         })
         .catch(err => {
-          console.error(err);
+          console.log(err);
         });
     },
     async confirm() {

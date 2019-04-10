@@ -1,15 +1,15 @@
 <template>
   <el-dropdown :hide-on-click="false" :show-timeout="100" trigger="click">
     <el-button plain>
-      发送给({{ platforms.length }})
+      {{ hint }}
       <i class="el-icon-caret-bottom el-icon--right" />
     </el-button>
     <el-dropdown-menu slot="dropdown" class="no-border">
-      <el-checkbox-group v-model="platforms" style="padding: 5px 15px;">
-        <el-checkbox v-for="item in platformsOptions" :key="item.key" :label="item.key">
+      <el-radio-group v-model="noticeType" style="padding: 5px 15px;">
+        <el-radio  v-for="item in showingPlatformsOptions" :key="item.id" :label="item.id">
           {{ item.name }}
-        </el-checkbox>
-      </el-checkbox-group>
+        </el-radio >
+      </el-radio-group>
     </el-dropdown-menu>
   </el-dropdown>
 </template>
@@ -19,8 +19,8 @@ export default {
   props: {
     value: {
       required: true,
-      default: () => [],
-      type: Array
+      default: () => 0,
+      type: Number
     },
     roles: {
       required: true,
@@ -31,51 +31,62 @@ export default {
   data() {
     let allPlatformsOptions = [
       { 
-        key: 'to-admin',
-        name: '管理员',
-        roles: ['teacher', 'student']
+        id: 0,
+        name: '全体用户',
+        roles: ['admin', 'teacher', 'student']
       },
       { 
-        key: 'to-all-teachers',
+        id: 1,
         name: '全体导师',
         roles: ['admin']
       },
       { 
-        key: 'to-all-students',
+        id: 2,
         name: '全体学生',
         roles: ['admin']
       },
       { 
-        key: 'to-my-students',
+        id: 3,
         name: '我的学生',
         roles: ['teacher']
       },
       {
-        key: 'to-a-teacher',
-        name: '导师私信',
+        id: 4,
+        name: '私信给管理员',
+        roles: ['teacher', 'student']
+      },
+      { 
+        id: 5,
+        name: '私信给导师',
         roles: ['admin', 'student']
       },
       { 
-        key: 'to-a-student',
-        name: '学生私信',
+        id: 6,
+        name: '私信给学生',
         roles: ['admin', 'teacher']
       }
     ]
-    let platformsOptions = allPlatformsOptions.filter(
+    let showingPlatformsOptions = allPlatformsOptions.filter(
       p => this.roles.some(r => p.roles.includes(r))
     )
     return {
-      platformsOptions
+      allPlatformsOptions,
+      showingPlatformsOptions
     }
   },
   computed: {
-    platforms: {
+    noticeType: {
       get() {
         return this.value
       },
       set(val) {
         this.$emit('input', val)
       }
+    },
+    hint() {
+      let typeObj = this.showingPlatformsOptions.find(p => p.id == this.noticeType)
+      if (!typeObj) return '请选择通知类型'
+      else return typeObj.name;
     }
   }
 }

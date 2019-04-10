@@ -56,6 +56,7 @@
 
 <script>
 import { fetchList } from '@/api/article'
+import { getNotices } from '@/api/notice'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
@@ -100,13 +101,16 @@ export default {
     hasPermission(scope) {
       return (this.isAdmin || (this.isTeacher && this.name == scope.row.author))
     },
-    getList() {
-      this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
-        this.listLoading = false
-      })
+    async getList() {
+      // this.listLoading = true
+      // fetchList(this.listQuery).then(response => {
+      //   this.list = response.data.items
+      //   this.total = response.data.total
+        
+      // })
+      const res = await getNotices();
+      this.list = res.data.data;
+      this.listLoading = false;
     },
     handleSizeChange(val) {
       this.listQuery.limit = val

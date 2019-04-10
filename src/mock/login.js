@@ -32,10 +32,11 @@ const userMap = {
 }
 
 let userList = []
+let i = 0
 for (const key in userMap) {
   if (userMap.hasOwnProperty(key)) {
     let element = userMap[key];
-    element.id = key
+    element.id = i++
     userList.push(element)
   }
 }

@@ -7,3 +7,11 @@ export function fetchList(query) {
     params: query
   })
 }
+
+export function assign(matchList) {
+  return request({
+    url: '/assignments',
+    method: 'post',
+    data: matchList
+  })
+}
