@@ -14,6 +14,11 @@
         <el-button v-loading="loading" type="warning" @click="draftForm">草稿</el-button>
       </sticky>
 
+          <el-checkbox-group 
+    v-model="receivers"
+    :min="1">
+    <el-checkbox v-for="r in availableReceivers" :label="r" :key="r.id">[{{r.code}}] {{r.name}}</el-checkbox>
+  </el-checkbox-group>
       <div class="createPost-main-container">
         <el-row>
           <Warning/>
@@ -104,6 +109,7 @@ import Sticky from "@/components/Sticky"; // 粘性header组件
 import { validURL } from "@/utils/validate";
 import { fetchArticle } from "@/api/article";
 import { addNotice } from "@/api/notice";
+import { getStudents } from "@/api/user";
 import { userSearch } from "@/api/remoteSearch";
 import Warning from "./Warning";
 import {
@@ -172,6 +178,8 @@ export default {
       }
     };
     return {
+      receivers: [],
+      availableReceivers: [],
       postForm: Object.assign({}, defaultForm),
       loading: false,
       roles: this.$store.getters.roles,
@@ -182,6 +190,7 @@ export default {
         content: [{ validator: validateRequire }],
         source_uri: [{ validator: validateSourceUri, trigger: "blur" }]
       },
+      dialogVisible: false,
       tempRoute: {}
     };
   },
@@ -204,6 +213,7 @@ export default {
       this.postForm = Object.assign({}, defaultForm);
       this.postForm.author = 1;
     }
+    this.getAvailableReceivers();
 
     // Why need to make a copy of this.$route here?
     // Because if you enter this page and quickly switch tag, may be in the execution of the setTagsViewTitle function, this.$route is no longer pointing to the current page
@@ -226,6 +236,23 @@ export default {
           console.log(err);
         });
     },
+    getAvailableReceivers() {
+      // switch(this.postForm.type) {
+
+      // }
+      this.getStudents();
+      
+    },
+    getStudents() {
+      getStudents().then(res => {
+        let payload = res.data;
+        let success = payload.code == 200;
+        if (success) {
+          this.availableReceivers = payload.data;
+        }
+      });
+    },
+    confirm() {},
     setTagsViewTitle() {
       const title = this.lang === "zh" ? "编辑通知" : "Edit Notice";
       const route = Object.assign({}, this.tempRoute, {
@@ -237,7 +264,14 @@ export default {
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true;
-          addNotice(this.postForm)
+          let privateDetails = this.receivers.map(r => {
+            return {receiver: r.id}
+          })
+          let notice = {
+            notice: this.postForm,
+            privateDetails
+          }
+          addNotice(notice)
             .then(
               res => {
                 let payload = res.data;
@@ -257,13 +291,7 @@ export default {
             .catch(err => {
               conosole.log(err);
             });
-          this.$notify({
-            title: "成功",
-            message: "发布文章成功",
-            type: "success",
-            duration: 2000
-          });
-          this.postForm.status = 0;
+          this.postForm.status = 1; // published
           this.loading = false;
         } else {
           console.log("error submit!!");
