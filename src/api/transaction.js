@@ -15,3 +15,10 @@ export function assign(matchList) {
     data: matchList
   })
 }
+
+export function download(fileId) {
+  return request({
+    url: `/download/${fileId}`,
+    method: 'get'
+  })
+}

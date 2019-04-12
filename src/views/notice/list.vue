@@ -72,7 +72,7 @@
 
 <script>
 import { fetchList } from "@/api/article";
-import { getNotices } from "@/api/notice";
+import { getNotices, pullUnreadNotices } from "@/api/notice";
 import Pagination from "@/components/Pagination"; // Secondary package based on el-pagination
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
@@ -120,13 +120,14 @@ export default {
   methods: {
     //连接
     connect() {
-      let stompClient = Stomp.over(new SockJS("http://localhost:8086/stomp-websocket"));
+      let stompClient = Stomp.over(new SockJS("http://localhost:8086/notice-websocket"));
 
       stompClient.connect(
         {},
         () => {
           console.log("Info: STOMP connection opened.");
 
+          // this.pullUnreadMessage("/topic/reply");
           //订阅服务端的/topic/greeting地址
           stompClient.subscribe("/broadcast/notices", function(res) {
             alert("Received: " + JSON.parse(res.body));
@@ -149,6 +150,22 @@ export default {
       log("Info: STOMP connection closed.");
       return stompClient;
     },
+
+    pullUnreadMessage(destination) {
+            pullUnreadNotices(destination).then(data => {
+              
+                    if (data.result != null) {
+                        $.each(data.result, function (i, item) {
+                            log(JSON.parse(item).content);
+                        })
+                    } else if (data.code !=null && data.code == "500") {
+                        layer.msg(data.msg, {
+                            offset: 'auto'
+                            ,icon: 2
+                        });
+                    }
+            });
+        },
 
     //向服务端发送姓名
     sendName(stompClient) {

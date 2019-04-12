@@ -1,31 +1,37 @@
 <template>
   <div class="components-container">
-    <code>
-      Based on <a class="link-type" href="https://github.com/rowanwins/vue-dropzone"> dropzone </a>.
-      {{ $t('components.dropzoneTips') }}
-    </code>
     <div class="editor-container">
-      <dropzone id="myVueDropzone" url="https://httpbin.org/post" @dropzone-removedFile="dropzoneR" @dropzone-success="dropzoneS" />
+      <dropzone
+        id="myVueDropzone"
+        url="http://localhost:8086/upload"
+        @dropzone-removedFile="dropzoneR"
+        @dropzone-success="dropzoneS"
+      />
     </div>
+    <a href="http://localhost:8086/download/3">下载文件</a>
   </div>
 </template>
 
 <script>
-import Dropzone from '@/components/Dropzone'
+import Dropzone from "@/components/Dropzone";
+import { download} from '@/api/transaction'
 
 export default {
-  name: 'DropzoneDemo',
+  name: "DropzoneDemo",
   components: { Dropzone },
   methods: {
     dropzoneS(file) {
-      console.log(file)
-      this.$message({ message: 'Upload success', type: 'success' })
+      console.log(file);
+      this.$message({ message: "Upload success", type: "success" });
+      download(3).then(res => {
+        console.log(res)
+      })
     },
     dropzoneR(file) {
-      console.log(file)
-      this.$message({ message: 'Delete success', type: 'success' })
+      console.log(file);
+      this.$message({ message: "Delete success", type: "success" });
     }
   }
-}
+};
 </script>
 

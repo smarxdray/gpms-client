@@ -14,3 +14,13 @@ export function addNotice(notice) {
         data: notice
     })
 }
+
+export function pullUnreadNotices(destination) {
+    return request({
+        url: "/notices/pullUnreadMessage",
+        type: "post",
+        data: {
+            destination
+        }
+    })
+}

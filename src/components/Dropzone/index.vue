@@ -1,6 +1,6 @@
 <template>
   <div :id="id" :ref="id" :action="url" class="dropzone">
-    <input type="file" name="file">
+    <input type="file" name="file"/>
   </div>
 </template>
 
@@ -27,7 +27,7 @@ export default {
     },
     defaultMsg: {
       type: String,
-      default: '上传图片'
+      default: '上传文件'
     },
     acceptedFiles: {
       type: String,
@@ -101,7 +101,7 @@ export default {
       acceptedFiles: this.acceptedFiles,
       autoProcessQueue: this.autoProcessQueue,
       dictDefaultMessage: '<i style="margin-top: 3em;display: inline-block" class="material-icons">' + this.defaultMsg + '</i><br>Drop files here to upload',
-      dictMaxFilesExceeded: '只能一个图',
+      dictMaxFilesExceeded: '已经上传的文件！',
       previewTemplate: '<div class="dz-preview dz-file-preview">  <div class="dz-image" style="width:' + this.thumbnailWidth + 'px;height:' + this.thumbnailHeight + 'px" ><img style="width:' + this.thumbnailWidth + 'px;height:' + this.thumbnailHeight + 'px" data-dz-thumbnail /></div>  <div class="dz-details"><div class="dz-size"><span data-dz-size></span></div> <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>  <div class="dz-error-message"><span data-dz-errormessage></span></div>  <div class="dz-success-mark"> <i class="material-icons">done</i> </div>  <div class="dz-error-mark"><i class="material-icons">error</i></div></div>',
       init() {
         const val = vm.defaultImg
@@ -139,7 +139,8 @@ export default {
       },
       sending: (file, xhr, formData) => {
         // formData.append('token', file.token);
-        // formData.append('key', file.key);
+        formData.append('id', this.$store.getters.user.id);
+
         vm.initOnce = false
       }
     })
@@ -169,6 +170,7 @@ export default {
     this.dropzone.destroy()
   },
   methods: {
+    handleChange(e) {},
     removeAllFiles() {
       this.dropzone.removeAllFiles(true)
     },
