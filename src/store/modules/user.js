@@ -3,7 +3,7 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
   state: {
-    id: 1,
+    id: 2,
     user: '',
     status: '',
     code: '',

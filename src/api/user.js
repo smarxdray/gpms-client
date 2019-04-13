@@ -10,6 +10,13 @@ export function getUsers() {
   })
 }
 
+export function getUserById(id) {
+  return request({
+    url: `/users/${id}`,
+    method: 'get'
+  })
+}
+
 export function addUser(user) {
   return request({
     url: '/users',
@@ -62,6 +69,24 @@ export function getStudentsWithoutTeacher() {
     method: 'get',
     params: {
       allotted: 0
+    }
+  })
+}
+export function getStudentsByTeacher(teacherId) {
+  return request({
+    url: '/students',
+    method: 'get',
+    params: {
+      teacher: teacherId
+    }
+  })
+}
+export function getStudentDetailsByTeacher(teacherId) {
+  return request({
+    url: '/students/details',
+    method: 'get',
+    params: {
+      teacher: teacherId
     }
   })
 }
