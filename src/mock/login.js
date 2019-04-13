@@ -57,6 +57,7 @@ export default {
   },
   getUserInfo: config => {
     const { token } = param2Obj(config.url)
+    console.log(token)
     if (userMap[token]) {
       return userMap[token]
     } else {

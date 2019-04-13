@@ -4,6 +4,7 @@ import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
+import { all } from 'q';
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
@@ -30,13 +31,15 @@ router.beforeEach((to, from, next) => {
         // 判断当前用户是否已拉取完user_info信息
         store
           .dispatch('GetUserInfo')
-          .then(res => {
+          .then(roles => {
             // 拉取user_info
-            const roles = res.data.roles // note: roles must be a object array! such as: [{id: '1', name: 'editor'}, {id: '2', name: 'developer'}]
             store.dispatch('GenerateRoutes', { roles }).then(accessRoutes => {
               // 根据roles权限生成可访问的路由表
               router.addRoutes(accessRoutes) // 动态添加可访问路由表
               next({ ...to, replace: true }) // hack方法 确保addRoutes已完成 ,set the replace: true so the navigation will not leave a history record
+            })
+            store.dispatch('GetRoleList').then(res => {}, err => {
+              Message.error(err);
             })
           })
           .catch(err => {

@@ -18,9 +18,9 @@ const roleList = {
       return new Promise((resolve, reject) => {
         getRoles().then(response => {
           const body = response.data
-          let roleList = body.data;
-          if (roleList && roleList.length > 0) { // 验证返回的roles是否是一个非空数组
-            context.commit('SET_LIST', roleList)
+          let roles = body.data;
+          if (roles && roles.length > 0) { // 验证返回的roles是否是一个非空数组
+            context.commit('SET_LIST', roles)
           } else {
             reject('getInfo: roles must be a non-null array!')
           }

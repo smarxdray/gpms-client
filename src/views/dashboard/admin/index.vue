@@ -110,24 +110,6 @@ export default {
     };
   },
   created() {
-    this.$store.dispatch("GetRoleList").then(
-      res => {
-        const body = res.data;
-        const roles = body.data;
-        let success = roles.length > 0;
-        if (!success)
-          this.$notify({
-            message: body.msg,
-            type: "warning"
-          });
-      },
-      err => {
-        this.$notify.error({
-          title: "请求错误",
-          message: err
-        });
-      }
-    );
   },
   methods: {
     handleSetLineChartData(type) {

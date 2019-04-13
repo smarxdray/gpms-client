@@ -1,12 +1,12 @@
 import request from '@/utils/request'
 
-export function loginByUsername(username, password) {
+export function loginByUsername(code, password) {
   const data = {
-    username,
+    code,
     password
   }
   return request({
-    url: '/login/login',
+    url: '/users/login',
     method: 'post',
     data
   })

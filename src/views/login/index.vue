@@ -80,23 +80,24 @@ export default {
   components: { LangSelect, SocialSign },
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
+      // if (!validUsername(value)) {
+        // callback(new Error('Please enter the correct user name'))
+      // } else {
         callback()
-      }
+      // }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
-      } else {
+      // if (value.length < 6) {
+        // callback(new Error('The password can not be less than 6 digits'))
+      // } else {
         callback()
-      }
+      // }
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '1111111'
+        username: '1',
+        password: '123',
+        allRoles: []
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -132,18 +133,21 @@ export default {
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
-        if (valid) {
+        // if (valid) {
           this.loading = true
           this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
+          }, err => {
+            this.$notify.error(err)
+            this.loading = false
           }).catch(() => {
             this.loading = false
           })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
+        // } else {
+          // console.log('error submit!!')
+          // return false
+        // }
       })
     },
     afterQRScan() {

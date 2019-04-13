@@ -17,6 +17,16 @@ export function getUserById(id) {
   })
 }
 
+export function getUserByToken(token) {
+  return request({
+    url: '/users',
+    method: 'get',
+    params: {
+      token
+    }
+  })
+}
+
 export function addUser(user) {
   return request({
     url: '/users',
