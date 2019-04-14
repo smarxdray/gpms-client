@@ -100,3 +100,13 @@ export function getStudentDetailsByTeacher(teacherId) {
     }
   })
 }
+
+export function getTeachersByMajor(majorId) {
+  return request({
+      url: '/users/teachers',
+      method: 'get',
+      params: {
+          major: majorId
+      }
+  })
+}

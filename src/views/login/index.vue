@@ -74,6 +74,8 @@
 import { validUsername } from '@/utils/validate'
 import LangSelect from '@/components/LangSelect'
 import SocialSign from './socialsignin'
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 
 export default {
   name: 'Login',
@@ -138,6 +140,7 @@ export default {
           this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
+            this.socketConnect();
           }, err => {
             this.$notify.error(err)
             this.loading = false
@@ -149,6 +152,71 @@ export default {
           // return false
         // }
       })
+    }, //连接
+    socketConnect() {
+      let stompClient = Stomp.over(
+        new SockJS("http://localhost:8086/notice-websocket")
+      );
+
+      stompClient.connect(
+        {},
+        () => {
+          console.log("Info: STOMP connection opened.");
+
+          // this.pullUnreadMessage("/topic/reply");
+
+          //订阅服务端的/topic/greeting地址
+          stompClient.subscribe("/broadcast/notices", (res) => {
+            let notice = JSON.parse(res.body)
+            if (notice.author != this.$store.getters.user.id)
+              this.$store.commit('SET_NEW_NOTICE', true);
+          });
+        },
+        () => {
+          //断开处理
+          console.log("Info: STOMP connection closed.");
+        }
+      );
+      return stompClient;
+    },
+
+    //断开连接
+    socketDisconnect(stompClient) {
+      if (stompClient != null) {
+        stompClient.disconnect();
+        stompClient = null;
+      }
+      log("Info: STOMP connection closed.");
+      return stompClient;
+    },
+
+    // pullUnreadMessage(destination) {
+    //   pullUnreadNotices(destination).then(data => {
+    //     if (data.result != null) {
+    //       $.each(data.result, function(i, item) {
+    //         log(JSON.parse(item).content);
+    //       });
+    //     } else if (data.code != null && data.code == "500") {
+    //       layer.msg(data.msg, {
+    //         offset: "auto",
+    //         icon: 2
+    //       });
+    //     }
+    //   });
+    // },
+    //向服务端发送姓名
+    sendName(stompClient) {
+      if (stompClient != null) {
+        var username = "username";
+        console.log("Sent: " + username);
+        stompClient.send(
+          "/message/hello",
+          {},
+          JSON.stringify({ name: username })
+        );
+      } else {
+        alert("STOMP connection not established, please connect.");
+      }
     },
     afterQRScan() {
       // const hash = window.location.hash.slice(1)

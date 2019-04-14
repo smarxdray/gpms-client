@@ -1,92 +1,207 @@
 <template>
   <div class="components-container">
-    <code>drag-list base on
-      <a href="https://github.com/SortableJS/Vue.Draggable" target="_blank">Vue.Draggable</a>
-    </code>
-    <el-select v-model="teacherSelected" placeholder="请先选择导师">
-    <el-option
-      v-for="item in teacherList"
-      :key="item.id"
-      :label="item.name"
-      :value="item">
-    </el-option>
-  </el-select>
-    <div class="editor-container">
-      <dnd-list :list1="studentsAlloted" :list2="studentsRest" :list1-title="list1Title" list2-title="待分配学生" />
-      <div style="text-align:right;">
+    <el-cascader
+      :options="options"
+      placeholder="下拉选项双击选择"
+      size="large"
+      @active-item-change="handleItemChange"
+      @change="handleValueChange"
+      :props="props"
+    ></el-cascader>
+    <div style="text-align:right;">
         <!-- <el-button type="danger" @click="dialogVisible=false">{{ $t('permission.cancel') }}</el-button> -->
-        <el-button type="primary" @click="confirm" :disabled="!Object.keys(teacherSelected).length">{{ $t('permission.confirm') }}</el-button>
+        <el-button
+          type="primary"
+          @click="confirm"
+          :disabled="!this.selectedTeacher.id || !allottedStudents.length"
+        >{{ $t('permission.confirm') }}</el-button>
       </div>
+    <div class="editor-container">
+      <dnd-list
+        :list1="allottedStudents"
+        :list2="restStudents"
+        :list1-title="list1Title"
+        list2-title="待分配学生"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import DndList from '@/components/DndList'
-import { getTeachers, getStudentsWithoutTeacher } from '@/api/user'
-import { assign } from '@/api/transaction'
-import i18n from "@/lang"
+import DndList from "@/components/DndList";
+import {
+  getTeachers,
+  getStudentsWithoutTeacher,
+  getTeachersByMajor
+} from "@/api/user";
+import { getColleges, getMajorsByCollege } from "@/api/info";
+import { assign } from "@/api/transaction";
+import i18n from "@/lang";
 
 export default {
-  name: 'DndListDemo',
+  name: "DndListDemo",
   components: { DndList },
   data() {
     return {
-      teacherList: [],
-      teacherSelected: {},
-      studentsAlloted: [],
-      studentsRest: []
-    }
+      options: [],
+      props: {
+        value: "id",
+        label: "name",
+        children: "children"
+      },
+      selectedOptions: [],
+      selectedCollege: {},
+      selectedMajor: {},
+      selectedTeacher: {
+        id: null
+      },
+      allottedStudents: [],
+      restStudents: []
+    };
   },
   computed: {
     list1Title() {
-      if (!Object.keys(this.teacherSelected).length) return '请先选择一位导师'
-      else {
-        return `拖拽右侧学生到此处以分配给导师${this.teacherSelected.name}`
-      }
+      return !this.selectedTeacher.id
+        ? "请先选择一位导师"
+        : "拖拽右侧学生到此处以分配给该导师";
     }
   },
   created() {
-    this.getData()
+    this.getColleges();
   },
   methods: {
+    handleItemChange(val) {
+      let length = val.length;
+      if (length == 1) {
+        let collegeId = val[0];
+        this.selectedCollege = this.options.find(c => c.id == collegeId);
+        if (!this.selectedCollege.hasOwnProperty("init")) {
+          getMajorsByCollege(collegeId).then(
+            res => {
+              if (res.data.code != 200) {
+                return this.$notify({
+                  message: res.msg,
+                  type: "warning"
+                });
+              }
+              let majors = res.data.data;
+              majors.forEach(m => (m.children = []));
+              this.selectedCollege.children = majors;
+              this.selectedCollege["init"] = true;
+            },
+            err => {
+              this.$notify.error({
+                message: err
+              });
+            }
+          );
+        }
+      } else if (length == 2) {
+        let majorId = val[1];
+        this.selectedMajor = this.selectedCollege.children.find(
+          m => m.id == majorId
+        );
+        if (!this.selectedMajor.hasOwnProperty("init")) {
+          getTeachersByMajor(majorId).then(
+            res => {
+              if (res.data.code != 200) {
+                return this.$notify({
+                  message: res.msg,
+                  type: "warning"
+                });
+              }
+              let teachers = res.data.data;
+              teachers = teachers.map(t => {
+                return t.basic;
+              });
+              this.selectedMajor.children = teachers;
+              this.selectedMajor["init"] = true;
+            },
+            err => {
+              this.$notify.error({
+                message: err
+              });
+            }
+          );
+        }
+      }
+    },
+    handleValueChange(val) {
+      if (val.length == 3) {
+        this.selectedTeacher.id = val[2];
+        getStudentsWithoutTeacher().then(
+          res => {
+            if (res.data.code != 200) {
+              return this.$notify({
+                message: res.msg,
+                type: "warning"
+              });
+            }
+            let body = res.data;
+            let students = body.data;
+            this.restStudents = students.filter(
+              s => s.detail.major == this.selectedMajor.id
+            );
+            console.log(this.restStudents)
+          },
+          err => {
+            this.$notify.error({
+              message: err
+            });
+          }
+        );
+      }
+    },
+    getColleges() {
+      getColleges().then(res => {
+        let body = res.data;
+        this.options = body.data;
+        this.options.forEach(c => (c.children = []));
+      });
+      console.log(this.options);
+    },
     getData() {
-      this.listLoading = true
+      this.listLoading = true;
       getTeachers().then(res => {
         const body = res.data;
         this.teacherList = body.data;
-      })
+      });
       getStudentsWithoutTeacher().then(res => {
         const body = res.data;
-        this.studentsRest = body.data;
-      })
+        this.restStudents = body.data;
+      });
     },
     confirm() {
       let matches = [];
-      this.studentsAlloted.forEach(s => {
+      this.allottedStudents.forEach(s => {
         matches.push({
           owner: s.basic.id,
-          teacher: this.teacherSelected.id
-        })
-      })
-      console.log(matches)
-      assign(matches).then(res => {
-        let payload = res.data;
-        let success = payload.code == 200;
-        this.$notify({
-          message: success ? '分配成功！' : payload.msg,
-          type: success ? 'success' : 'warning'
-        })
-      }, err => {
-        this.$notify.error({
-          title: "请求错误",
-          message: err
-        })
-      }).catch(err => {
-        console.log(err)
+          teacher: this.selectedTeacher.id
+        });
       });
+      console.log(matches);
+      assign(matches)
+        .then(
+          res => {
+            let payload = res.data;
+            let success = payload.code == 200;
+            this.$notify({
+              message: success ? "分配成功！" : payload.msg,
+              type: success ? "success" : "warning"
+            });
+          },
+          err => {
+            this.$notify.error({
+              title: "请求错误",
+              message: err
+            });
+          }
+        )
+        .catch(err => {
+          console.log(err);
+        });
     }
   }
-}
+};
 </script>
 

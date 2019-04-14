@@ -1,20 +1,26 @@
 <template>
   <div class="app-container">
-    <el-table
+    <!-- <el-table
       v-loading="listLoading"
       :data="list"
       border
       fit
       highlight-current-row
       style="width: 100%"
-    >
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
+    >-->
+    <el-card v-for="n in list" :key="n.id" class="box-card">
+      <div slot="header" class="clearfix">
+        <span>{{n.title}}</span>
+        <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+      </div>
+      <router-link :to="'/notice/detail/'+n.id" class="link-type">
+        <div class="text item">发布者：{{ n.author }}</div>
+        <div class="text item">发布日期：{{ n.updateTime | parseTime('{y}-{m}-{d}') }}</div>
+        <div class="text item">摘要：{{ n.contentShort.length ? n.contentShort : '暂无摘要' }}</div>
+      </router-link>
+    </el-card>
 
-      <el-table-column width="180px" align="center" label="Date">
+    <!-- <el-table-column width="180px" align="center" label="Date">
         <template slot-scope="scope">
           <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
@@ -57,8 +63,8 @@
             <el-button type="primary" size="small" icon="el-icon-edit">Edit</el-button>
           </router-link>
         </template>
-      </el-table-column>
-    </el-table>
+    </el-table-column>-->
+    <!-- </el-table> -->
 
     <pagination
       v-show="total>0"
@@ -74,8 +80,6 @@
 import { fetchList } from "@/api/article";
 import { getNotices, pullUnreadNotices } from "@/api/notice";
 import Pagination from "@/components/Pagination"; // Secondary package based on el-pagination
-import SockJS from "sockjs-client";
-import Stomp from "stompjs";
 
 export default {
   name: "ArticleList",
@@ -115,72 +119,8 @@ export default {
   },
   created() {
     this.getList();
-    this.connect();
   },
   methods: {
-    //连接
-    connect() {
-      let stompClient = Stomp.over(new SockJS("http://localhost:8086/notice-websocket"));
-
-      stompClient.connect(
-        {},
-        () => {
-          console.log("Info: STOMP connection opened.");
-
-          // this.pullUnreadMessage("/topic/reply");
-          //订阅服务端的/topic/greeting地址
-          stompClient.subscribe("/broadcast/notices", function(res) {
-            alert("Received: " + JSON.parse(res.body));
-          });
-        },
-        () => {
-          //断开处理
-          console.log("Info: STOMP connection closed.");
-        }
-      );
-      return stompClient;
-    },
-
-    //断开连接
-    disconnect(stompClient) {
-      if (stompClient != null) {
-        stompClient.disconnect();
-        stompClient = null;
-      }
-      log("Info: STOMP connection closed.");
-      return stompClient;
-    },
-
-    pullUnreadMessage(destination) {
-            pullUnreadNotices(destination).then(data => {
-              
-                    if (data.result != null) {
-                        $.each(data.result, function (i, item) {
-                            log(JSON.parse(item).content);
-                        })
-                    } else if (data.code !=null && data.code == "500") {
-                        layer.msg(data.msg, {
-                            offset: 'auto'
-                            ,icon: 2
-                        });
-                    }
-            });
-        },
-
-    //向服务端发送姓名
-    sendName(stompClient) {
-      if (stompClient != null) {
-        var username = "username";
-        console.log("Sent: " + username);
-        stompClient.send(
-          "/message/hello",
-          {},
-          JSON.stringify({ name: username })
-        );
-      } else {
-        alert("STOMP connection not established, please connect.");
-      }
-    },
     hasPermission(scope) {
       return this.isAdmin || (this.isTeacher && this.name == scope.row.author);
     },
@@ -215,5 +155,27 @@ export default {
   position: absolute;
   right: 15px;
   top: 10px;
+}
+.text {
+  font-size: 14px;
+}
+
+.item {
+  margin-bottom: 18px;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+.clearfix:after {
+  clear: both;
+}
+
+.box-card {
+  margin: 0 auto;
+  width: 80%;
+  margin-bottom: 10px;
 }
 </style>

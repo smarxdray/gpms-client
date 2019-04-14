@@ -1,6 +1,7 @@
 import { loginByUsername, logout, getUserInfo } from '@/api/login'
 import { getUserByToken } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+// import store from './store'
 
 const user = {
   state: {
@@ -75,12 +76,14 @@ const user = {
         getUserByToken(state.token).then(res => {
           const body = res.data;
           const user = body.data.user;
-          let roles = body.data.roles;
-          roles = roles.filter(r => r.id == user.role).map(r => r.name);
-          commit('SET_ROLES', roles)
           commit('SET_ID', user.id)
           commit('SET_CODE', user.code)
           commit('SET_NAME', user.name)
+          commit('SET_AVATAR', user.avatarUri)
+          let allRoles = body.data.roles;
+          commit('SET_ROLE_LIST', allRoles)
+          let roles = allRoles.filter(r => r.id == user.role).map(r => r.name);
+          commit('SET_ROLES', roles)
           resolve(roles)
         }).catch(error => {
           reject(error)

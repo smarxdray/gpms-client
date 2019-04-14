@@ -2,48 +2,28 @@
   <div class="app-container">
     <el-button type="primary" @click="handleAddUser">{{ $t('permission.addAccount') }}</el-button>
     <el-table :data="userList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="Code" width="150">
+      <el-table-column align="center" label="学工号" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.code }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Name" width="150">
+      <el-table-column align="center" label="姓名" width="150">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
-      <el-table-column align="header-center" label="Description">
-        <template slot-scope="scope">{{ scope.row.desc }}</template>
+      <el-table-column align="header-center" label="类型" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.role | roleFilter(roleList) }}</span>
+          </template>
       </el-table-column>
-
-      <el-table-column width="180px" align="center" label="Date">
+      <el-table-column width="180px" align="center" label="创建时间">
         <template slot-scope="scope">
           <span>{{ scope.row.createTime | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" align="center" label="Name">
-        <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="100px" label="Role">
-        <template slot-scope="scope">
-          <span>{{ scope.row.role | roleFilter(roleList)}}</span>
-        </template>
-      </el-table-column>
-
       <el-table-column class-name="status-col" label="Status" width="110">
         <template slot-scope="scope">
-          <span>{{ scope.row.status | statusFilter(statusList)}}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column min-width="50px" align="center" label="E-mail">
-        <template slot-scope="scope">
-          <!-- <router-link :to="'/example/edit/'+scope.row.id" class="link-type">
-            <span>{{ scope.row.title }}</span>
-          </router-link>-->
-          <span v-html="scope.row.email"/>
+          <el-tag :type="scope.row.status | statusTagFilter ">{{ scope.row.status | statusFilter(statusList)}}</el-tag>
         </template>
       </el-table-column>
 
@@ -63,43 +43,33 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog
+    <!-- <el-dialog
       :visible.sync="dialogVisible"
       :title="dialogType==='edit'?'Edit Account':'New Account'"
     >
+      
+      
+    </el-dialog> -->
+    <el-dialog v-el-drag-dialog :visible.sync="dialogVisible" 
+    :title="dialogType==='edit'?'Edit Account':'New Account'"
+     >
       <el-form :model="user" label-width="80px" label-position="left">
         <el-form-item label="Code">
-          <el-input v-model="user.code" placeholder="Account code"/>
-        </el-form-item>
-        <el-form-item label="Name">
-          <el-input v-model="user.name" placeholder="Account Name"/>
-        </el-form-item>
-        <el-form-item label="Gender">
-          <el-input v-model="user.gender" placeholder="Account gender"/>
+          <el-input v-model="user.code" placeholder="Account phone"/>
         </el-form-item>
         <el-form-item label="Role">
           <el-select v-model="user.role"  placeholder="Account role">
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="user.status" placeholder="Account status">
-            <el-option
-              v-for="item in statusList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Phone">
-          <el-input v-model="user.phone" placeholder="Account phone"/>
+        <el-form-item label="Phone" >
+          <el-input v-model="user.phone" placeholder="Account phone" />
         </el-form-item>
         <el-form-item label="Email">
-          <el-input v-model="user.email" placeholder="Account email"/>
+          <el-input v-model="user.email" placeholder="Account email" />
         </el-form-item>
         <el-form-item label="Desc">
-          <el-input v-model="user.desc" placeholder="Account desc"/>
+          <el-input v-model="user.desc" placeholder="Account desc" />
         </el-form-item>
         <el-form-item label="AvatarUri">
           <el-input v-model="user.avatarUri" placeholder="Account avatarUri"/>
@@ -112,6 +82,16 @@
         </el-form-item>
         <el-form-item label="notifyDisabled">
           <el-input v-model="user.notifyDisabled" placeholder="Account notifyDisabled"/>
+        </el-form-item>
+        <el-form-item label="Status">
+          <el-select v-model="user.status" placeholder="Account status">
+            <el-option
+              v-for="item in statusList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
@@ -128,7 +108,8 @@ import { deepClone } from "@/utils";
 import { statusFilter, roleFilter } from "@/filters"
 import { getUsers, addUser, updateUser, deleteUser } from "@/api/user";
 import { getRoles } from "@/api/role"
-import i18n from "@/lang";
+import i18n from "@/lang"
+import elDragDialog from '@/directive/el-dragDialog'
 
 const defaultUser = {
   id: 0,
@@ -149,6 +130,7 @@ const defaultUser = {
 };
 
 export default {
+  directives: { elDragDialog },
   data() {
     return {
       // roleList: [],
@@ -174,28 +156,17 @@ export default {
     },
     statusFilter(id, list) {
       return list.find(s => (s.id == id)).name;
+    },
+    statusTagFilter(id) {
+      // const types =  ['success', 'info', 'warning', 'danger']
+      switch (id) {
+        case -1: return 'danger'; break;
+        case 0: return 'success'; break;
+        default: return ''; break;
+      }
     }
   },
   created() {
-    
-    this.$store.dispatch("GetRoleList").then(
-      res => {
-        const body = res.data;
-        const roles = body.data;
-        let success = roles.length > 0;
-        if (!success)
-          this.$notify({
-            message: body.msg,
-            type: "warning"
-          });
-      },
-      err => {
-        this.$notify.error({
-          title: "请求错误",
-          message: err
-        });
-      }
-    );
     this.getUsers();
   },
   computed: {
@@ -226,6 +197,9 @@ export default {
       this.user = Object.assign({}, defaultUser);
       this.dialogType = "new";
       this.dialogVisible = true;
+    },
+     handleDrag() {
+      // this.$refs.select.blur()
     },
     handleEdit(scope) {
       this.dialogType = "edit";
