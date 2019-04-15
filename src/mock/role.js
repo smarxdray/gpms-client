@@ -53,38 +53,38 @@ const routes = deepClone([...constantRoutes, ...asyncRoutes])
 //     }]
 //   }
 // ]
-const roles = [
-  {
-    id: 1,
-    name: 'admin',
-    description: 'Super Administrator. Have access to view all pages.',
-    routes: routes
-  },
-  {
-    id: 2,
-    name: 'forbbiden',
-    description: 'Normal Teacher. Can see all pages except permission page',
-    routes: filterAsyncRoutes(routes, ['forbidden'])
-  },
-  {
-    id: 3,
-    name: 'visitor',
-    description: 'Normal visitor. Can see all pages except permission page',
-    routes: filterAsyncRoutes(routes, ['visitor'])
-  },
-  {
-    id: 4,
-    name: 'teacher',
-    description: 'Normal Teacher. Can see all pages except permission page',
-    routes: filterAsyncRoutes(routes, ['teacher'])
-  },
-  {
-    id: 5,
-    name: 'student',
-    description: 'Normal Student. Can see all pages except permission page',
-    routes: filterAsyncRoutes(routes, ['student'])
-  }
-]
+// const roles = [
+  // {
+  //   id: 1,
+  //   name: 'admin',
+  //   description: 'Super Administrator. Have access to view all pages.',
+  //   routes: routes
+  // },
+  // {
+  //   id: 2,
+  //   name: 'forbbiden',
+  //   description: 'Normal Teacher. Can see all pages except permission page',
+  //   routes: filterAsyncRoutes(routes, ['forbidden'])
+  // },
+  // {
+  //   id: 3,
+  //   name: 'visitor',
+  //   description: 'Normal visitor. Can see all pages except permission page',
+  //   routes: filterAsyncRoutes(routes, ['visitor'])
+  // },
+  // {
+  //   id: 4,
+  //   name: 'teacher',
+  //   description: 'Normal Teacher. Can see all pages except permission page',
+  //   routes: filterAsyncRoutes(routes, ['teacher'])
+  // },
+  // {
+  //   id: 5,
+  //   name: 'student',
+  //   description: 'Normal Student. Can see all pages except permission page',
+  //   routes: filterAsyncRoutes(routes, ['student'])
+  // }
+// ]
 
 export default {
   getRoutes() {

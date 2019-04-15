@@ -171,35 +171,17 @@ export const asyncRoutes = [
   //   ]
   // },
   {
-    path: '/account',
+    path: '/notify',
+    redirect: '/notify/index',
     component: Layout,
-    redirect: '/account/index',
     children: [
       {
         path: 'index',
-        component: () => import('@/views/account/list'),
-        name: 'Account',
+        component: () => import('@/views/notice/create'),
+        name: 'Notify',
         meta: {
-          title: '账户管理',
-          icon: 'user',
-          // roles: ['admin']
-        }
-      }
-    ]
-  },
-  {
-    path: '/allot',
-    component: Layout,
-    redirect: '/allot/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/allot/dndList'),
-        name: 'Allot',
-        meta: {
-          title: '导师分配',
-          icon: 'tree',
-          // roles: ['admin']
+          title: '公告发布',
+          icon: 'edit'
         }
       }
     ]
@@ -215,8 +197,7 @@ export const asyncRoutes = [
         name: 'NoticeList',
         meta: {
           title: '公告中心',
-          icon: 'message',
-          // roles: ['admin', 'teacher', 'student']
+          icon: 'message'
         }
       },
       {
@@ -225,8 +206,7 @@ export const asyncRoutes = [
         component: () => import('@/views/notice/detail'),
         name: 'NoticeDetail',
         meta: {
-          title: '公告详情',
-          // roles: ['admin', 'teacher', 'student']
+          title: '公告详情'
         }
       },
       {
@@ -234,41 +214,126 @@ export const asyncRoutes = [
         hidden: true,
         component: () => import('@/views/notice/edit'),
         name: 'NoticeEdit',
-        meta: { title: 'editArticle', noCache: true }
+        meta: {
+          title: 'editArticle',
+          noCache: true
+        }
       },
     ]
   },
   {
-    path: '/notify',
-    redirect: '/notify/index',
+    path: '/project',
+    redirect: '/project/list',
+    component: Layout,
+    meta: {
+      title: '课题创建',
+      icon: 'excel'
+    },
+    children: [
+      {
+        path: 'list/:project?',
+        hidden: true,
+        component: () => import('@/views/project/list'),
+        name: 'ProjectList',
+        meta: {
+          title: '已有课题'
+        }
+      },
+      {
+        path: 'detail/:id(\\d+)',
+        hidden: true,
+        component: () => import('@/views/project/detail'),
+        name: 'ProjectDetail',
+        meta: {
+          title: '课题详情'
+        }
+      },
+      {
+        path: 'edit/:idx(\\d+)',
+        hidden: true,
+        component: () => import('@/views/project/edit'),
+        name: 'ProjectEdit',
+        meta: {
+          title: 'editArticle',
+          noCache: true
+        }
+      },
+      {
+        path: 'create',
+        hidden: true,
+        component: () => import('@/views/project/create'),
+        name: 'ProjectCreate',
+        meta: {
+          title: '新增课题',
+          noCache: true
+        }
+      }
+    ]
+  },
+  {
+    path: '/assign',
+    component: Layout,
+    redirect: '/assign/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/allot/dndList'),
+        name: 'Assign',
+        meta: {
+          title: '导师分配',
+          icon: 'tree',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
+  {
+    path: '/account',
+    component: Layout,
+    redirect: '/account/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/account/list'),
+        name: 'Account',
+        meta: {
+          title: '账号管理',
+          icon: 'user',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
+  {
+    path: '/admin-review',
+    redirect: '/admin-review/index',
     component: Layout,
     children: [
       {
         path: 'index',
         component: () => import('@/views/notice/create'),
-        name: 'Notify',
+        name: 'AdminReview',
         meta: {
-          title: '公告发布',
-          icon: 'edit',
-          // roles: ['admin', 'teacher']
+          title: '选题审核',
+          icon: 'eye-open',
+          roles: ['admin']
         }
       }
     ]
   },
-
   {
-    path: '/review',
+    path: '/teacher-review',
     component: Layout,
-    redirect: '/review/index',
+    redirect: '/teacher-review/index',
     children: [
       {
         path: 'index',
         component: () => import('@/views/review/list'),
-        name: 'Review',
+        name: 'TeacherReview',
         meta: {
           title: '毕设审核',
           icon: 'eye-open',
-          // roles: ['admin', 'teacher']
+          roles: ['teacher']
         }
       }
     ]
@@ -285,7 +350,7 @@ export const asyncRoutes = [
         meta: {
           title: '毕设提交',
           icon: 'guide',
-          // roles: ['student']
+          roles: ['student']
         }
       }
     ]

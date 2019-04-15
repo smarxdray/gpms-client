@@ -142,7 +142,6 @@ export default {
             this.restStudents = students.filter(
               s => s.detail.major == this.selectedMajor.id
             );
-            console.log(this.restStudents)
           },
           err => {
             this.$notify.error({
