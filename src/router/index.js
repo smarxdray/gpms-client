@@ -231,7 +231,7 @@ export const asyncRoutes = [
     },
     children: [
       {
-        path: 'list/:project?',
+        path: 'list',
         hidden: true,
         component: () => import('@/views/project/list'),
         name: 'ProjectList',
@@ -311,7 +311,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/notice/create'),
+        component: () => import('@/views/admin-review/list'),
         name: 'AdminReview',
         meta: {
           title: '选题审核',
@@ -328,7 +328,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/review/list'),
+        component: () => import('@/views/teacher-review/list'),
         name: 'TeacherReview',
         meta: {
           title: '毕设审核',

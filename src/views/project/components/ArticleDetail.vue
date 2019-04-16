@@ -38,7 +38,7 @@ import {
 
 const defaultForm = {
   teacher: 0,
-  status: 0,
+  status: -1,
   title: "", // 文章题目
   content: "", // 文章内容
   createTime: new Date(),
@@ -127,8 +127,6 @@ export default {
       this.postForm = Object.assign({}, defaultForm);
       this.postForm.teacher = this.$store.getters.user.id;
     }
-    this.getAvailableReceivers();
-
     // Why need to make a copy of this.$route here?
     // Because if you enter this page and quickly switch tag, may be in the execution of the setTagsViewTitle function, this.$route is no longer pointing to the current page
     // https://github.com/PanJiaChen/vue-element-admin/issues/1221
@@ -138,11 +136,18 @@ export default {
     backToList() {
       this.postForm.createTime = new Date();
       this.postForm.updateTime = new Date();
+      let list = localStorage[this.key];
+      if (!list) {
+        list = [];
+        list.push(this.postForm);
+        localStorage[this.key] = JSON.stringify(list);
+      } else {
+        list = JSON.parse(list);
+        list.push(this.postForm);
+        localStorage[this.key] = JSON.stringify(list);
+      }
       this.$router.push({
-        name: 'ProjectList',
-        params: {
-          project: this.postForm
-        }
+        name: 'ProjectList'
       })
     },
     fetchData(id) {

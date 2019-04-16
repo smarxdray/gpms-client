@@ -77,6 +77,24 @@ export default {
         page: 1,
         limit: 20
       },
+      statusList: [
+        {
+          id: -1,
+          name: '草稿'
+        },{
+          id: 0,
+          name: '待审核'
+        },{
+          id: 1,
+          name: '已审核'
+        },{
+          id: 10,
+          name: '待认领'
+        },{
+          id: 11,
+          name: '已认领'
+        }
+      ],
       key: 'projectList'
     };
   },
@@ -92,14 +110,23 @@ export default {
     }
   },
   created() {
-    let key = this.key
-    let list = localStorage[key]
+    let list = localStorage[this.key]
     if (!list) {
-      localStorage[key] = JSON.stringify(this.list);
+      localStorage[this.key] = JSON.stringify(this.list);
     } else {
       this.list = JSON.parse(list);
-      let newProject = this.$route.params.project;
-      if (newProject.hasOwnProperty("title")) this.list.push(newProject);
+    }
+  },
+  filters: {
+    statusFilter(id, list) {
+      return list.find(s => s.id == id).name
+    },
+    statusTagFilter(id) {
+      switch(id) {
+        case -1: return 'danger';
+        break;
+        case 0: return 'warning';
+      }
     }
   },
   watch: {
@@ -143,6 +170,9 @@ export default {
         this.$notify({
           message: success ? '提交成功！' : res.data.msg,
           type: success ? 'success' : 'warning'
+        })
+        this.list.forEach(p => {
+          p.status = 0;
         })
       }, err => {
         this.$notify.error({

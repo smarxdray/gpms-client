@@ -13,7 +13,7 @@
         <el-button
           type="primary"
           @click="confirm"
-          :disabled="!this.selectedTeacher.id || !allottedStudents.length"
+          :disabled="!this.selectedTeacher.id"
         >{{ $t('permission.confirm') }}</el-button>
       </div>
     <div class="editor-container">
@@ -31,11 +31,12 @@
 import DndList from "@/components/DndList";
 import {
   getTeachers,
+  getTeachersByMajor,
   getStudentsWithoutTeacher,
-  getTeachersByMajor
+  getStudentsByTeacher
 } from "@/api/user";
 import { getColleges, getMajorsByCollege } from "@/api/info";
-import { assign } from "@/api/transaction";
+import { assign, unassign, setAssignment } from "@/api/transaction";
 import i18n from "@/lang";
 
 export default {
@@ -129,18 +130,31 @@ export default {
     handleValueChange(val) {
       if (val.length == 3) {
         this.selectedTeacher.id = val[2];
+        getStudentsByTeacher(this.selectedTeacher.id).then(res => {
+          let body = res.data;
+          if (body.code != 200) {
+            return this.$notify({
+              message: body.msg
+            })
+          }
+          this.allottedStudents = body.data;
+        });
         getStudentsWithoutTeacher().then(
           res => {
-            if (res.data.code != 200) {
+            let body = res.data;
+            if (body.code != 200) {
               return this.$notify({
-                message: res.msg,
+                message: body.msg,
                 type: "warning"
               });
             }
-            let body = res.data;
             let students = body.data;
             this.restStudents = students.filter(
-              s => s.detail.major == this.selectedMajor.id
+              s => {
+                if (s.detail) {
+                  return s.detail.major == this.selectedMajor.id;
+                } else return false
+              }
             );
           },
           err => {
@@ -157,29 +171,65 @@ export default {
         this.options = body.data;
         this.options.forEach(c => (c.children = []));
       });
-      console.log(this.options);
-    },
-    getData() {
-      this.listLoading = true;
-      getTeachers().then(res => {
-        const body = res.data;
-        this.teacherList = body.data;
-      });
-      getStudentsWithoutTeacher().then(res => {
-        const body = res.data;
-        this.restStudents = body.data;
-      });
     },
     confirm() {
-      let matches = [];
+      let assignedStudentDetails = [];
       this.allottedStudents.forEach(s => {
-        matches.push({
+        assignedStudentDetails.push({  // studentDetail
+          id: s.detail.id,
           owner: s.basic.id,
           teacher: this.selectedTeacher.id
         });
       });
-      console.log(matches);
-      assign(matches)
+      // assign(assignedStudentDetails)
+      //   .then(
+      //     res => {
+      //       let payload = res.data;
+      //       let success = payload.code == 200;
+      //       this.$notify({
+      //         message: success ? "分配成功！" : payload.msg,
+      //         type: success ? "success" : "warning"
+      //       });
+      //     },
+      //     err => {
+      //       this.$notify.error({
+      //         title: "请求错误",
+      //         message: err
+      //       });
+      //     }
+      //   )
+      //   .catch(err => {
+      //     console.log(err);
+      //   });
+        let unassignedStudentDetials = [];
+        this.restStudents.forEach( s => {
+          unassignedStudentDetials.push({
+            id: s.detail.id,
+            owner: s.basic.id,
+            teacher: null
+          })
+        });
+        // unassign(unassignedStudentDetials)
+        // .then(
+        //   res => {
+        //     let payload = res.data;
+        //     let success = payload.code == 200;
+        //     if (!success) this.$notify({
+        //       message: payload.msg,
+        //       type: "warning"
+        //     });
+        //   },
+        //   err => {
+        //     this.$notify.error({
+        //       title: "请求错误",
+        //       message: err
+        //     });
+        //   }
+        // )
+        // .catch(err => {
+        //   console.log(err);
+        // });
+        setAssignment(assignedStudentDetails, unassignedStudentDetials) 
         .then(
           res => {
             let payload = res.data;
