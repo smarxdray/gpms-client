@@ -231,7 +231,7 @@ export const asyncRoutes = [
     },
     children: [
       {
-        path: 'list',
+        path: 'list/:id?',
         hidden: true,
         component: () => import('@/views/project/list'),
         name: 'ProjectList',
@@ -249,7 +249,7 @@ export const asyncRoutes = [
         }
       },
       {
-        path: 'edit/:idx(\\d+)',
+        path: 'edit/:id(\\d+)',
         hidden: true,
         component: () => import('@/views/project/edit'),
         name: 'ProjectEdit',
@@ -282,7 +282,7 @@ export const asyncRoutes = [
         meta: {
           title: '导师分配',
           icon: 'tree',
-          roles: ['admin']
+          // roles: ['admin']
         }
       }
     ]
@@ -299,7 +299,7 @@ export const asyncRoutes = [
         meta: {
           title: '账号管理',
           icon: 'user',
-          roles: ['admin']
+          // roles: ['admin']
         }
       }
     ]
@@ -316,7 +316,7 @@ export const asyncRoutes = [
         meta: {
           title: '选题审核',
           icon: 'eye-open',
-          roles: ['admin']
+          // roles: ['admin']
         }
       }
     ]
@@ -333,7 +333,24 @@ export const asyncRoutes = [
         meta: {
           title: '毕设审核',
           icon: 'eye-open',
-          roles: ['teacher']
+          // roles: ['teacher']
+        }
+      }
+    ]
+  },
+  {
+    path: '/select',
+    component: Layout,
+    redirect: '/select/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/project/list'),
+        name: 'Select',
+        meta: {
+          title: '课题选择',
+          icon: 'excel',
+          // roles: ['student']
         }
       }
     ]
@@ -350,7 +367,7 @@ export const asyncRoutes = [
         meta: {
           title: '毕设提交',
           icon: 'guide',
-          roles: ['student']
+          // roles: ['student']
         }
       }
     ]

@@ -73,6 +73,13 @@ export function getStudents() {
   })
 }
 
+export function getStudentDetail(studentId) {
+  return request({
+    url: `/users/students/details/${studentId}`,
+    method: 'get'
+  })
+}
+
 export function getStudentsWithoutTeacher() {
   return request({
     url: '/students',
@@ -109,5 +116,42 @@ export function getTeachersByMajor(majorId) {
       params: {
           major: majorId
       }
+  })
+}
+
+export function getTeacherDetail(teacherId) {
+  return request({
+    url: '/users/teachers/details',
+    method: 'get',
+    params: {
+      id: teacherId
+    }
+  })
+}
+
+export function getTeachersHavingProjects(projectStatus) {
+  return request({
+    url: '/users/teachers',
+    method: 'get',
+    params: {
+      'project-status': projectStatus
+    }
+  })
+}
+
+export function getTeachersByQuery(listQuery) {
+  let name = listQuery.name == '' ? null : listQuery.name;
+  let college = listQuery.college == '' ? null : listQuery.college;
+  let major = listQuery.major == '' ? null : listQuery.major;
+  let projectStatus = listQuery.projectStatus == '' ? null : listQuery.projectStatus;
+  return request({
+    url: '/users/teachers',
+    method: 'post',
+    data: {
+      name,
+      college,
+      major,
+      projectStatus
+    }
   })
 }

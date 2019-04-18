@@ -35,6 +35,17 @@ export function setAssignment(assigned, unassigned) {
   })
 }
 
+export function selectProject(studentId, projectId) {
+  return request({
+    url: '/select-project',
+    method: 'put',
+    data: {
+      student: studentId,
+      project: projectId
+    }
+  })
+}
+
 export function download(fileId) {
   return request({
     url: `/download/${fileId}`,

@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" :placeholder="$t('table.importance')" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
+      <el-input v-model="listQuery.name" :placeholder="$t('table.title')" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.college" :placeholder="$t('table.importance')" clearable style="width: 90px" class="filter-item">
+        <el-option v-for="item in collegeOptions" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
+      <el-select v-model="listQuery.major" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in majorOptions" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
@@ -27,59 +27,70 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column :label="$t('table.id')" prop="id" sortable="custom" align="center" width="65">
+      <!-- <el-table-column :label="$t('table.id')" prop="id" sortable="custom" align="center" width="65">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.date')" width="150px" align="center">
+      </el-table-column> -->
+      <el-table-column :label="'学工号'" width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{ scope.row.basic.code}}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.title')" min-width="150px">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
+      <!-- <el-table-column :label="$t('table.title')" min-width="150px">
+        <template slot-scope="scope"> -->
+          <!-- <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span> -->
+          <!-- <span>{{ scope.row.title }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column :label="$t('table.author')" width="110px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
+          <span>{{ scope.row.basic.name }}</span>
         </template>
       </el-table-column>
       <el-table-column v-if="showReviewer" :label="$t('table.reviewer')" width="110px" align="center">
         <template slot-scope="scope">
-          <span style="color:red;">{{ scope.row.reviewer }}</span>
+          <span style="color:red;">{{ scope.row.reviewerName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.importance')" width="80px">
+      <el-table-column label="学院" width="80px">
         <template slot-scope="scope">
-          <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon" />
+          <span>{{ scope.row.detail.college }}</span>
+          <!-- <svg-icon v-for="n in +scope.row.college" :key="n" icon-class="star" class="meta-item__icon" /> -->
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.readings')" align="center" width="95">
+      <el-table-column label="专业" align="center" width="95">
         <template slot-scope="scope">
-          <span v-if="scope.row.pageviews" class="link-type" @click="handleFetchPv(scope.row.pageviews)">{{ scope.row.pageviews }}</span>
-          <span v-else>0</span>
+          <span>{{ scope.row.detail.major }}</span>
+          <!-- <span v-if="scope.row.major" class="link-type" @click="handleFetchPv(scope.row.pageviews)">{{ scope.row.pageviews }}</span> -->
+          <!-- <span v-else>0</span> -->
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.status')" class-name="status-col" width="100">
+      <el-table-column label="学生人数" class-name="status-col" width="100">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
+          <!-- <el-tag :type="scope.row.basic.status | statusFilter">{{ scope.row.status }}</el-tag> -->
+          <span>{{ scope.row.detail.studentNumber }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column class-name="status-col" label="Status" width="100">
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.status | statusTagFilter "
+          >{{ scope.row.detail.projectStatus | statusFilter(projectStatusList)}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
-          <el-button v-if="scope.row.status!='published'" size="mini" type="success" @click="handleModifyStatus(scope.row,'published')">
-            {{ $t('table.publish') }}
+          <el-button type="primary" size="mini" @click="getProjects(scope.row)">
+            查看详情</el-button>
+          <el-button :disabled="scope.row.status >= 11" size="mini" type="success" @click="handleApprove(scope.row)">
+            批准
           </el-button>
-          <el-button v-if="scope.row.status!='draft'" size="mini" @click="handleModifyStatus(scope.row,'draft')">
+          <!-- <el-button v-if="scope.row.status!='draft'" size="mini" @click="handleModifyStatus(scope.row,'draft')">
             {{ $t('table.draft') }}
-          </el-button>
-          <el-button v-if="scope.row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">
-            {{ $t('table.delete') }}
+          </el-button> -->
+          <el-button :disabled="scope.row.status >= 11" size="mini" type="danger" @click="handleUnapprove(scope.row)">
+            不予批准
           </el-button>
         </template>
       </el-table-column>
@@ -89,11 +100,11 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.type')" prop="type">
+        <!-- <el-form-item :label="$t('table.type')" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item :label="$t('table.date')" prop="timestamp">
           <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
         </el-form-item>
@@ -133,6 +144,9 @@
 
 <script>
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
+import { getColleges, getMajors } from '@/api/college'
+import { getProjectDetails, updateProjectsByTeacher } from '@/api/project' 
+import { getTeachersHavingProjects, getTeachersByQuery } from '@/api/user'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -156,12 +170,10 @@ export default {
   directives: { waves },
   filters: {
     statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
+      switch(status) {
+        case -1: return 'danger'; break;
+        case 0: return 'warning'; break;
       }
-      return statusMap[status]
     },
     typeFilter(type) {
       return calendarTypeKeyValue[type]
@@ -176,13 +188,15 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
+        name: '',
+        college: '',
+        major: '',
         type: undefined,
-        sort: '+id'
+        sort: '+id',
+        projectStatus: 0
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
+      collegeOptions: [],
+      majorOptions: [],
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
@@ -208,35 +222,116 @@ export default {
         timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
         title: [{ required: true, message: 'title is required', trigger: 'blur' }]
       },
-      downloadLoading: false
+      downloadLoading: false,
+      projectStatusList: [
+        {
+          id: -1,
+          name: "未提交"
+        },
+        {
+          id: 0,
+          name: "待审核"
+        },
+        {
+          id: 10,
+          name: "审核未通过"
+        },
+        {
+          id: 11,
+          name: "通过"
+        },
+        {
+          id: 110,
+          name: '未认领'
+        },
+        {
+          id: 111,
+          name: '已认领'
+        }
+      ],
     }
   },
   created() {
     this.getList()
   },
+  computed: {
+  },
+  filters: {
+    statusFilter(id, list) {
+      return list.find(s => s.id == id).name;
+    },
+    statusTagFilter(id) {
+      switch (id) {
+        case -1:
+          return "danger";
+          break;
+        case 0:
+          return "warning";
+      }
+    }
+  },
   methods: {
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
-
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
+      getTeachersByQuery(this.listQuery).then(res => {
+        let body = res.data;
+        this.list = body.data;
+        // this.total = response.data.total
+        this.listLoading = false
+      });
+      getColleges().then(res => {
+        let body = res.data;
+        this.collegeOptions = body.data; 
+      });
+      getMajors().then(res => {
+        let body = res.data;
+        this.majorOptions = body.data;
+      })
+    },
+    getProjects(row) {
+      let teacherId = row.basic.id;
+      this.$router.push({
+        name: 'ProjectList',
+        params: {
+          id: teacherId
+        }
       })
     },
     handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
+      // this.listQuery.page = 1
+      // this.getList()
+      // this.list.filter(t => {
+      //   let a = this.listQuery.college == undefined? true : (this.listQuery.college == t.college);
+      //   let b = this.listQuery.major == undefined ? true : (this.listQuery.major == t.major);
+      //   return a && b;
+      // })
+      getTeachersByQuery(this.listQuery).then(res => {
+        this.list = res.data.data;
+      })
     },
-    handleModifyStatus(row, status) {
+    handleApprove(row) {
+      console.log(row)
+      updateProjectsByTeacher(row.basic.id, 11).then(res => {
+        let success = res.data.code == 200
+        if (success) this.$notify({
+          message: '成功！',
+          type: 'success'
+        })
+      })
       this.$message({
         message: '操作成功',
         type: 'success'
       })
       row.status = status
+    },
+    handleUnapprove(row) {
+      updateProjectsByTeacher(row.basic.id, 10).then(res => {
+        let success = res.data.code == 200;
+        if (success) this.$notify({
+          message: '成功！',
+          type: 'success'
+        })
+      })
     },
     sortChange(data) {
       const { prop, order } = data

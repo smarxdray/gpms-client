@@ -6,6 +6,7 @@ import permission from './modules/permission'
 import tagsView from './modules/tagsView'
 import user from './modules/user'
 import roleList from './modules/roleList'
+import projectStatus from './modules/projectStatus'
 import pop from './modules/pop'
 import tmp from './modules/tmp'
 import getters from './getters'
@@ -20,6 +21,7 @@ const store = new Vuex.Store({
     tagsView,
     user,
     roleList,
+    projectStatus,
     pop,
     tmp
   },

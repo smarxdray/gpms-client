@@ -2,7 +2,7 @@
   <div class="createPost-container">
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
       <sticky :class-name="'sub-navbar '+postForm.status">
-        <el-button v-loading="loading" type="warning" @click="backToList">保存</el-button>
+        <el-button v-loading="loading" type="warning" @click="saveAsDraft">保存</el-button>
       </sticky>
       <div class="createPost-main-container">
           <Warning/>
@@ -27,6 +27,7 @@ import Sticky from "@/components/Sticky"; // 粘性header组件
 import { validURL } from "@/utils/validate";
 import { fetchArticle } from "@/api/article";
 import { addNotice } from "@/api/notice";
+import { getProjectById, addProjects} from "@/api/project";
 import { getStudents } from "@/api/user";
 import { userSearch } from "@/api/remoteSearch";
 import Warning from "./Warning";
@@ -121,8 +122,8 @@ export default {
   },
   created() {
     if (this.isEdit) {
-      let idx = this.$route.params.idx
-      this.postForm = JSON.parse(localStorage[this.key])[idx];
+      let id = this.$route.params.id
+      this.fetchData(id)
     } else {
       this.postForm = Object.assign({}, defaultForm);
       this.postForm.teacher = this.$store.getters.user.id;
@@ -133,30 +134,28 @@ export default {
     this.tempRoute = Object.assign({}, this.$route);
   },
   methods: {
-    backToList() {
+    saveAsDraft() {
       this.postForm.createTime = new Date();
       this.postForm.updateTime = new Date();
-      let list = localStorage[this.key];
-      if (!list) {
-        list = [];
-        list.push(this.postForm);
-        localStorage[this.key] = JSON.stringify(list);
-      } else {
-        list = JSON.parse(list);
-        list.push(this.postForm);
-        localStorage[this.key] = JSON.stringify(list);
-      }
+      this.postForm.status = -1;
+      addProjects([this.postForm]).then(res => {
+        let success = res.data.code == 200;
+        if (!success) {
+          this.$notify({
+            message: res.data.msg,
+            type: 'warning'
+          })
+        }
+      })
       this.$router.push({
         name: 'ProjectList'
       })
     },
     fetchData(id) {
-      fetchArticle(id)
-        .then(response => {
-          this.postForm = response.data;
-          // Just for test
-          this.postForm.title += `   Article Id:${this.postForm.id}`;
-          this.postForm.contentShort += `   Article Id:${this.postForm.id}`;
+      getProjectById(id).then(res => {
+        let payload = res.data;
+        console.log(res)
+        this.postForm = payload.data;
 
           // Set tagsview title
           this.setTagsViewTitle();

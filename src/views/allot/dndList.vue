@@ -18,7 +18,7 @@
       </div>
     <div class="editor-container">
       <dnd-list
-        :list1="allottedStudents"
+        :list1="assignedStudets"
         :list2="restStudents"
         :list1-title="list1Title"
         list2-title="待分配学生"
@@ -56,7 +56,7 @@ export default {
       selectedTeacher: {
         id: null
       },
-      allottedStudents: [],
+      assignedStudets: [],
       restStudents: []
     };
   },
@@ -137,7 +137,7 @@ export default {
               message: body.msg
             })
           }
-          this.allottedStudents = body.data;
+          this.assignedStudets = body.data;
         });
         getStudentsWithoutTeacher().then(
           res => {
@@ -174,7 +174,7 @@ export default {
     },
     confirm() {
       let assignedStudentDetails = [];
-      this.allottedStudents.forEach(s => {
+      this.assignedStudets.forEach(s => {
         assignedStudentDetails.push({  // studentDetail
           id: s.detail.id,
           owner: s.basic.id,

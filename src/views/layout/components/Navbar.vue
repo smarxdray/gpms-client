@@ -84,6 +84,7 @@ export default {
     },
     logout() {
       this.$store.dispatch('LogOut').then(() => {
+        localStorage.clear();
         location.reload()// In order to re-instantiate the vue-router object to avoid bugs
       })
     }

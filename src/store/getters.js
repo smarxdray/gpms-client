@@ -17,6 +17,7 @@ const getters = {
   addRoutes: state => state.permission.addRoutes,
   errorLogs: state => state.errorLog.logs,
   roleList: state => state.roleList.list,
+  projectStatus: state => state.projectStatus.list,
   newNotice: state => state.pop.newNotice,
   sth: state => state.tmp.sth
 }
