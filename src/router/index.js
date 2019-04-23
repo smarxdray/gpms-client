@@ -225,10 +225,6 @@ export const asyncRoutes = [
     path: '/project',
     redirect: '/project/list',
     component: Layout,
-    meta: {
-      title: '课题创建',
-      icon: 'excel'
-    },
     children: [
       {
         path: 'list/:id?',
@@ -236,7 +232,7 @@ export const asyncRoutes = [
         component: () => import('@/views/project/list'),
         name: 'ProjectList',
         meta: {
-          title: '已有课题'
+          title: '已有课题',
         }
       },
       {
@@ -255,7 +251,11 @@ export const asyncRoutes = [
         name: 'ProjectEdit',
         meta: {
           title: 'editArticle',
-          noCache: true
+          noCache: true,
+          meta: {
+            title: '编辑课题',
+            roles: ['teacher']
+          }
         }
       },
       {
@@ -265,7 +265,8 @@ export const asyncRoutes = [
         name: 'ProjectCreate',
         meta: {
           title: '新增课题',
-          noCache: true
+          noCache: true,
+          roles: ['teacher']
         }
       }
     ]
@@ -277,12 +278,12 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/allot/dndList'),
+        component: () => import('@/views/assign/dndList'),
         name: 'Assign',
         meta: {
           title: '导师分配',
           icon: 'tree',
-          // roles: ['admin']
+          roles: ['admin']
         }
       }
     ]
@@ -299,7 +300,7 @@ export const asyncRoutes = [
         meta: {
           title: '账号管理',
           icon: 'user',
-          // roles: ['admin']
+          roles: ['admin']
         }
       }
     ]
@@ -316,7 +317,24 @@ export const asyncRoutes = [
         meta: {
           title: '选题审核',
           icon: 'eye-open',
-          // roles: ['admin']
+          roles: ['admin']
+        }
+      }
+    ]
+  },
+  {
+    path: '/teacher-project',
+    component: Layout,
+    redirect: '/teacher-project/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/project/list'),
+        name: 'TeacherProject',
+        meta: {
+          title: '课题创建',
+          icon: 'excel',
+          roles: ['teacher']
         }
       }
     ]
@@ -333,7 +351,7 @@ export const asyncRoutes = [
         meta: {
           title: '毕设审核',
           icon: 'eye-open',
-          // roles: ['teacher']
+          roles: ['teacher']
         }
       }
     ]
@@ -350,8 +368,8 @@ export const asyncRoutes = [
         meta: {
           title: '课题选择',
           icon: 'excel',
-          // roles: ['student']
-        }
+          roles: ['student']
+        },
       }
     ]
   },
@@ -365,10 +383,10 @@ export const asyncRoutes = [
         component: () => import('@/views/commit/dropzone'),
         name: 'Commit',
         meta: {
-          title: '毕设提交',
+          title: '文件提交',
           icon: 'guide',
-          // roles: ['student']
-        }
+          roles: ['student']
+        },
       }
     ]
   },

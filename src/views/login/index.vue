@@ -141,6 +141,7 @@ export default {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
             this.socketConnect();
+            console.log(this.$store.getters.user)
           }, err => {
             this.$notify.error(err)
             this.loading = false

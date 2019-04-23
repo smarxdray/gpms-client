@@ -7,13 +7,6 @@ export function getRoutes() {
   })
 }
 
-export function getRoles() {
-  return request({
-    url: '/roles',
-    method: 'get'
-  })
-}
-
 export function deleteRole(id) {
   return request({
     url: `/roles/${id}`,

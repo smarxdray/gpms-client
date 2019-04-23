@@ -35,7 +35,7 @@ import {
   getStudentsWithoutTeacher,
   getStudentsByTeacher
 } from "@/api/user";
-import { getColleges, getMajorsByCollege } from "@/api/info";
+import { getColleges, getMajorsByCollege } from "@/api/etc";
 import { assign, unassign, setAssignment } from "@/api/transaction";
 import i18n from "@/lang";
 

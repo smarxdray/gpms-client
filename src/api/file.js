@@ -12,7 +12,7 @@ export function getFilesByOwner(ownerId) {
 
 export function downloadFile(id) {
     return request({
-      url: `/files/download/${id}`,
+      url: `/files/${id}/download`,
       method: 'get'
     })
-  }
+}

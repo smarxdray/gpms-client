@@ -11,7 +11,7 @@ const projectStatus = {
             },
             {
                 id: 10,
-                name: "审核未通过"
+                name: "未通过"
             },
             {
                 id: 11,
@@ -19,7 +19,7 @@ const projectStatus = {
             },
             {
                 id: 110,
-                name: '未认领'
+                name: '待认领'
             },
             {
                 id: 111,

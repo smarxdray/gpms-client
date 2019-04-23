@@ -3,7 +3,7 @@
     <div class="editor-container">
       <dropzone
         id="myVueDropzone"
-        url="http://localhost:8086/upload"
+        url="http://localhost:8086/files/upload"
         @dropzone-removedFile="dropzoneR"
         @dropzone-success="dropzoneS"
       />

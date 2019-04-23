@@ -3,7 +3,7 @@
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
       <sticky :class-name="'sub-navbar '+postForm.status">
         <!-- <CommentDropdown v-model="postForm.comment_disabled" /> -->
-        <PlatformDropdown v-model="postForm.type" :roles="roles"/>
+        <PlatformDropdown v-if="!toSpecialOne" v-model="postForm.type" :roles="roles"/>
         <!-- <SourceUrlDropdown v-model="postForm.source_uri" /> -->
         <el-button
           v-loading="loading"
@@ -11,17 +11,12 @@
           type="success"
           @click="submitForm"
         >发布</el-button>
-        <el-button v-loading="loading" type="warning" @click="draftForm">草稿</el-button>
       </sticky>
 
-          <el-checkbox-group 
-    v-model="receivers"
-    :min="1">
-    <el-checkbox v-for="r in availableReceivers" :label="r" :key="r.id">[{{r.code}}] {{r.name}}</el-checkbox>
-  </el-checkbox-group>
+          
       <div class="createPost-main-container">
         <el-row>
-          <Warning/>
+          <!-- <Warning/> -->
 
           <el-col :span="24">
             <el-form-item style="margin-bottom: 40px;" prop="title">
@@ -31,18 +26,15 @@
             <div class="postInfo-container">
               <el-row>
                 <el-col :span="8">
-                  <el-form-item label-width="45px" label="作者:" class="postInfo-container-item">
+                  <el-form-item v-if="availableReceivers.length > 0" label-width="80px" label="发送给:" class="postInfo-container-item">
                     <el-select
-                      v-model="postForm.author"
-                      :remote-method="getRemoteUserList"
-                      filterable
-                      remote
-                      placeholder="搜索用户"
+                      v-model="receiver"
+                      placeholder="请选择用户"
                     >
                       <el-option
-                        v-for="(item,index) in userListOptions"
-                        :key="item+index"
-                        :label="item"
+                        v-for="item in availableReceivers"
+                        :key="item.id"
+                        :label="`[${item.code}] ${item.name}`"
                         :value="item.id"
                       />
                     </el-select>
@@ -92,10 +84,6 @@
         <el-form-item prop="content" style="margin-bottom: 30px;">
           <Tinymce ref="editor" v-model="postForm.content" :height="400"/>
         </el-form-item>
-
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
-          <Upload v-model="postForm.imageUri"/>
-        </el-form-item>
       </div>
     </el-form>
   </div>
@@ -109,7 +97,7 @@ import Sticky from "@/components/Sticky"; // 粘性header组件
 import { validURL } from "@/utils/validate";
 import { fetchArticle } from "@/api/article";
 import { addNotice } from "@/api/notice";
-import { getStudents } from "@/api/user";
+import { getUserById, getAdmins, getTeachers, getStudents } from "@/api/user";
 import { userSearch } from "@/api/remoteSearch";
 import Warning from "./Warning";
 import {
@@ -178,7 +166,7 @@ export default {
       }
     };
     return {
-      receivers: [],
+      receiver: undefined,
       availableReceivers: [],
       postForm: Object.assign({}, defaultForm),
       loading: false,
@@ -191,10 +179,14 @@ export default {
         source_uri: [{ validator: validateSourceUri, trigger: "blur" }]
       },
       dialogVisible: false,
+      toSpecialOne: false,
       tempRoute: {}
     };
   },
   computed: {
+    type() {
+      return this.postForm.type
+    },
     contentShortLength() {
       return this.postForm.contentShort.length;
     },
@@ -211,14 +203,57 @@ export default {
       this.fetchData(id);
     } else {
       this.postForm = Object.assign({}, defaultForm);
-      this.postForm.author = 1;
+      this.postForm.author = this.$store.getters.user.id;
+      let receiver = this.$route.query.to;
+      if (receiver) {
+        this.toSpecialOne = true;
+        this.receiver = parseInt(receiver);
+        this.postForm.type = 5;
+        getUserById(receiver).then(res => {
+          this.availableReceivers = [res.data.data]
+        })
+      }
     }
-    this.getAvailableReceivers();
 
     // Why need to make a copy of this.$route here?
     // Because if you enter this page and quickly switch tag, may be in the execution of the setTagsViewTitle function, this.$route is no longer pointing to the current page
     // https://github.com/PanJiaChen/vue-element-admin/issues/1221
     this.tempRoute = Object.assign({}, this.$route);
+  },
+  watch: {
+    type(newVal, oldVal) {
+      if (this.toSpecialOne) return;
+      switch(newVal) {
+        // 全体师生（含管理员）
+        case 0: 
+          this.availableReceivers = [];
+        break;
+        // 全体导师
+        case 1: 
+          this.availableReceivers = [];
+        break;
+        // 全体学生
+        case 2: 
+          this.availableReceivers = [];
+        break;
+        // 本人全体学生
+        case 3:
+          this.availableReceivers = [];
+        break;
+        // 管理员私信
+        case 4:
+          this.setAvailableReceivers(getAdmins);
+        break;
+        // 导师私信
+        case 5:
+          this.setAvailableReceivers(getTeachers);
+        break;
+        // 学生私信
+        case 6:
+          this.setAvailableReceivers(getStudents);
+        break;
+      }
+    }
   },
   methods: {
     fetchData(id) {
@@ -236,15 +271,8 @@ export default {
           console.log(err);
         });
     },
-    getAvailableReceivers() {
-      // switch(this.postForm.type) {
-
-      // }
-      this.getStudents();
-      
-    },
-    getStudents() {
-      getStudents().then(res => {
+    setAvailableReceivers(promise) {
+      promise().then(res => {
         let payload = res.data;
         let success = payload.code == 200;
         if (success) {
@@ -252,7 +280,6 @@ export default {
         }
       });
     },
-    confirm() {},
     setTagsViewTitle() {
       const title = this.lang === "zh" ? "编辑通知" : "Edit Notice";
       const route = Object.assign({}, this.tempRoute, {
@@ -264,12 +291,15 @@ export default {
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true;
-          let privateDetails = this.receivers.map(r => {
-            return {receiver: r.id}
-          })
+          let privateNotice;
+          if (this.receiver != null && this.receiver != undefined && this.receiver != '') {
+            privateNotice = {receiver: this.receiver}
+          } else {
+            privateNotice = null;
+          }
           let notice = {
-            notice: this.postForm,
-            privateDetails
+            basic: this.postForm,
+            detail: privateNotice
           }
           addNotice(notice)
             .then(
@@ -297,31 +327,6 @@ export default {
           console.log("error submit!!");
           return false;
         }
-      });
-    },
-    draftForm() {
-      if (
-        this.postForm.content.length === 0 ||
-        this.postForm.title.length === 0
-      ) {
-        this.$message({
-          message: "请填写必要的标题和内容",
-          type: "warning"
-        });
-        return;
-      }
-      this.$message({
-        message: "保存成功",
-        type: "success",
-        showClose: true,
-        duration: 1000
-      });
-      this.postForm.status = "draft";
-    },
-    getRemoteUserList(query) {
-      userSearch(query).then(response => {
-        if (!response.data.items) return;
-        this.userListOptions = response.data.items.map(v => v.name);
       });
     }
   }

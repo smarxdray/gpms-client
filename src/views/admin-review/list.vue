@@ -11,6 +11,9 @@
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
+      <el-select v-model="listQuery.type" style="width: 140px" class="filter-item" @change="handleTypeChange">
+        <el-option v-for="item in typeOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">{{ $t('table.export') }}</el-button>
@@ -79,19 +82,11 @@
           >{{ scope.row.detail.projectStatus | statusFilter(projectStatusList)}}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column :label="$t('table.actions')" align="center" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="getProjects(scope.row)">
-            查看详情</el-button>
-          <el-button :disabled="scope.row.status >= 11" size="mini" type="success" @click="handleApprove(scope.row)">
-            批准
-          </el-button>
-          <!-- <el-button v-if="scope.row.status!='draft'" size="mini" @click="handleModifyStatus(scope.row,'draft')">
-            {{ $t('table.draft') }}
-          </el-button> -->
-          <el-button :disabled="scope.row.status >= 11" size="mini" type="danger" @click="handleUnapprove(scope.row)">
-            不予批准
-          </el-button>
+          <el-button type="primary" size="mini" @click="getProjects(scope.row)">查看详情</el-button>
+          <el-button :disabled="scope.row.detail.projectStatus > 0" size="mini" type="success" @click="handleApprove(scope.row)">批准</el-button>
+          <el-button :disabled="scope.row.detail.projectStatus > 0" size="mini" type="danger" @click="handleUnapprove(scope.row)">不予批准</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -144,7 +139,7 @@
 
 <script>
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
-import { getColleges, getMajors } from '@/api/college'
+import { getColleges, getMajors } from '@/api/etc'
 import { getProjectDetails, updateProjectsByTeacher } from '@/api/project' 
 import { getTeachersHavingProjects, getTeachersByQuery } from '@/api/user'
 import waves from '@/directive/waves' // Waves directive
@@ -198,6 +193,7 @@ export default {
       collegeOptions: [],
       majorOptions: [],
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
+      typeOptions: [{ label: '课题', key: 0 }, { label: '文件', key: 1 }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
@@ -309,6 +305,9 @@ export default {
         this.list = res.data.data;
       })
     },
+    handleTypeChange() {
+      getFilesByQuery
+    },
     handleApprove(row) {
       console.log(row)
       updateProjectsByTeacher(row.basic.id, 11).then(res => {
@@ -327,10 +326,18 @@ export default {
     handleUnapprove(row) {
       updateProjectsByTeacher(row.basic.id, 10).then(res => {
         let success = res.data.code == 200;
-        if (success) this.$notify({
-          message: '成功！',
-          type: 'success'
+        if (success) {
+          this.$notify({
+          message: '操作成功！请消息通知该导师',
+          type: 'warning'
         })
+        this.$router.push({
+          name: 'Notify',
+          query: {
+            to: row.basic.id
+          }
+        })
+        }
       })
     },
     sortChange(data) {

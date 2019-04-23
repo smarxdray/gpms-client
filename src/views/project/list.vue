@@ -5,11 +5,12 @@
     </template>
     <template v-else>
       <p v-if="isTeacher">您有{{detail.studentNumber}}名学生，请提交不少于该数量的课题。</p>
-      <p v-if="!canSelect">您已选择了ID为{{detail.project}}的课题</p>
+      <p v-if="hasProject">您已选择了ID为{{detail.project}}的课题</p>
       <router-link to="/project/create">
         <el-button type="primary" v-if="isTeacher" :disabled="!canCreate">添加课题</el-button>
       </router-link>
       <el-button type="primary" v-if="isTeacher" :disabled="!canSubmit" @click="handleSummit">提请审核</el-button>
+      <el-button type="primary" v-if="isTeacher" :disabled="!canPublish" @click="handlePublish">课题公布</el-button>
       <el-table :data="list" style="width: 100%;margin-top:30px;" border>
         <el-table-column align="center" label="ID" width="60">
           <template slot-scope="scope">
@@ -41,7 +42,12 @@
               <el-button type="primary" size="small">详情</el-button>
             </router-link>
             <router-link :to="`/project/edit/${scope.row.id}`">
-              <el-button v-if="isTeacher" :disabled="!(scope.row.status === -1)" type="primary" size="small">编辑</el-button>
+              <el-button
+                v-if="isTeacher"
+                :disabled="!(scope.row.status == -1 || scope.row.status == 10)"
+                type="primary"
+                size="small"
+              >编辑</el-button>
             </router-link>
             <el-button
               :disabled="!(scope.row.status === -1)"
@@ -50,7 +56,19 @@
               v-if="isTeacher"
               @click="handleDelete(scope)"
             >删除</el-button>
-            <el-button type="primary" size="small" v-if="isStudent" @click="handleSelect(scope.row)">选择</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="isStudent && !canUnselect(scope.row)"
+              :disabled="detail.project != null"
+              @click="handleSelect(scope.row)"
+            >选择</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="canUnselect(scope.row)"
+              @click="handleUnselect(scope.row)"
+            >取消选择</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -68,10 +86,15 @@
 
 <script>
 import { fetchList } from "@/api/article";
-import { getTeacherDetail, getStudentDetail } from "@/api/user";
+import { getUserDetail } from "@/api/user";
 import { getNotices, pullUnreadNotices } from "@/api/notice";
-import { getProjectsByTeacher, addProjects, deleteProject } from "@/api/project";
-import { selectProject } from '@/api/transaction'
+import {
+  getProjectsByTeacher,
+  addProjects,
+  updateProjectsByTeacher,
+  deleteProject
+} from "@/api/project";
+import { selectProject, unselectProject } from "@/api/transaction";
 import Pagination from "@/components/Pagination"; // Secondary package based on el-pagination
 
 export default {
@@ -98,6 +121,7 @@ export default {
       },
       statusList: this.$store.getters.projectStatus,
       detail: {},
+      teacherId: undefined,
       key: "projectList"
     };
   },
@@ -136,45 +160,30 @@ export default {
         return true;
       else false;
     },
+    canPublish() {
+      if (this.isTeacher && this.detail.projectStatus == 11) return true;
+      else return false;
+    },
+    hasProject() {
+      return this.detail.project != null;
+    },
     canSelect() {
       if (this.isStudent && this.detail.project) return false;
       else return true;
-    }
+    },
   },
   created() {
-    if (this.isTeacher) {
-      getTeacherDetail(this.$store.getters.user.id).then(res => {
-        let body = res.data;
-        let success = body.code == 200;
-        if (success) {
-          this.detail = body.data;
+    this.getDetail()
+      .then(() => {
+        if (this.isTeacher) this.teacherId = this.$store.getters.user.id;
+        if (this.isStudent) this.teacherId = this.detail.teacher;
+        if (this.isAdmin) this.teacherId = this.$route.params.id;
+        if (this.teacherId == undefined) {
+          this.list = [];
+          return;
         }
+        this.getList(this.teacherId);
       });
-    } else if (this.isStudent) {
-      getStudentDetail(this.$store.getters.user.id).then(res => {
-        let body = res.data;
-        let success = body.code == 200;
-        if (success) {
-          this.detail = body.data;
-        }
-        console.log(this.detail)
-      });
-    }
-
-    let teacherId;
-    if (this.isTeacher) teacherId = this.$store.getters.user.id;
-    if (this.isStudent) teacherId = this.detail.teacher;
-    getProjectsByTeacher(teacherId).then(res => {
-      let body = res.data;
-      let success = body.code == 200;
-      if (!success) {
-        this.$notify({
-          message: body.msg,
-          type: "warning"
-        });
-      }
-      this.list = body.data;
-    });
   },
   filters: {
     statusFilter(id, list) {
@@ -208,14 +217,33 @@ export default {
       selectProject(this.$store.getters.user.id, project.id).then(res => {
         let body = res.data;
         let success = body.code == 200;
-        if (!success) {
-          return this.$notify({
-            message: '操作失败！',
-            type: 'warning'
-          })
-        }
-        project.status = 111;
-      })
+        this.$notify({
+            message: success ? "选择成功！" : "操作失败！",
+            type: success ? "success" : "warning"
+          });
+          if (success) {
+            this.getDetail();
+            this.getList(this.teacherId);
+          }
+      });
+    },
+    canUnselect(project) {
+      return project.student === this.$store.getters.user.id ? true : false
+    },
+    handleUnselect(project) {
+      unselectProject(this.$store.getters.user.id, project.id).then(res => {
+        console.log(res)
+        let body = res.data;
+        let success = body.code == 200;
+        this.$notify({
+            message: success ? "取消成功！" : "操作失败！",
+            type: success ? "success" : "warning"
+          });
+          if (success) {
+            this.getDetail();
+            this.getList(this.teacherId);
+          }
+      });
     },
     handleDelete(scope) {
       deleteProject(scope.row.id).then(res => {
@@ -224,24 +252,42 @@ export default {
         if (!success) {
           this.$notify({
             message: body.msg,
-            type: 'warning'
-          })
+            type: "warning"
+          });
         }
         this.list.splice(scope.$index, 1);
-      })
+      });
     },
     hasPermission(scope) {
       return this.isAdmin || (this.isTeacher && this.name == scope.row.author);
     },
-    async getList() {
-      // this.listLoading = true
-      // fetchList(this.listQuery).then(response => {
-      //   this.list = response.data.items
-      //   this.total = response.data.total
-      // })
-      // const res = await getNotices();
-      // this.list = res.data.data;
-      // this.listLoading = false;
+    async getList(teacherId) {
+      this.listLoading = true
+      getProjectsByTeacher(teacherId).then(res => {
+          let body = res.data;
+          let success = body.code == 200;
+          if (!success) {
+            this.$notify({
+              message: body.msg,
+              type: "warning"
+            });
+          }
+          this.list = body.data;
+        this.listLoading = false;
+        });
+    },
+    getDetail() {
+      return getUserDetail(this.$store.getters.user.id)
+      .then(res => {
+        let body = res.data;
+        let success = body.code == 200;
+        if (success) {
+          this.detail = body.data;
+        }
+        return new Promise((resolve, reject) => {
+            resolve();
+        });
+      })
     },
     handleSummit() {
       //   getTeacherDetail(this.$store.getters.user.id).then(res => {
@@ -257,9 +303,15 @@ export default {
       //   this.number = detail.studentNumber;
       //   console.log(this.number)
       // })
+      if (!this.canSubmit) {
+        return this.$notify({
+          message: "不符合提请审核要求！",
+          type: "warning"
+        });
+      }
       this.list.forEach(p => {
         p.status = 0;
-      })
+      });
       addProjects(this.list).then(
         res => {
           let success = res.data.code == 200;
@@ -269,8 +321,35 @@ export default {
           });
           if (!success) {
             this.list.forEach(p => {
-            p.status = -1;
+              p.status = -1;
+            });
+          }
+        },
+        err => {
+          this.$notify.error({
+            message: err
           });
+        }
+      );
+    },
+    handlePublish() {
+      if (!this.canPublish) {
+        return this.$notify({
+          message: "不符合发布课题要求！",
+          type: "warning"
+        });
+      }
+      updateProjectsByTeacher(this.teacherId, 110).then(
+        res => {
+          let success = res.data.code == 200;
+          this.$notify({
+            message: success ? "发布成功！" : res.data.msg,
+            type: success ? "success" : "warning"
+          });
+          if (!success) {
+            this.list.forEach(p => {
+              p.status = -1;
+            });
           }
         },
         err => {

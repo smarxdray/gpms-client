@@ -7,6 +7,13 @@ export function getColleges() {
     })
 }
 
+export function getMajors() {
+    return request({
+        url: '/majors',
+        method: 'get'
+    })
+}
+
 export function getMajorsByCollege(collegeId) {
     return request({
         url: '/majors',
@@ -16,3 +23,10 @@ export function getMajorsByCollege(collegeId) {
         }
     })
 }
+
+export function getRoles() {
+    return request({
+      url: '/roles',
+      method: 'get'
+    })
+  }

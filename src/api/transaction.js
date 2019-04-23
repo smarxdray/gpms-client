@@ -8,21 +8,21 @@ export function fetchList(query) {
   })
 }
 
-export function assign(matchList) {
-  return request({
-    url: '/assignments',
-    method: 'post',
-    data: matchList
-  })
-}
+// export function assign(matchList) {
+//   return request({
+//     url: '/assignments',
+//     method: 'post',
+//     data: matchList
+//   })
+// }
 
-export function unassign(matchList) {
-  return request({
-    url: '/assignments',
-    method: 'delete',
-    data: matchList
-  })
-}
+// export function unassign(matchList) {
+//   return request({
+//     url: '/assignments',
+//     method: 'delete',
+//     data: matchList
+//   })
+// }
 
 export function setAssignment(assigned, unassigned) {
   return request({
@@ -46,10 +46,14 @@ export function selectProject(studentId, projectId) {
   })
 }
 
-export function download(fileId) {
+export function unselectProject(studentId, projectId) {
   return request({
-    url: `/download/${fileId}`,
-    method: 'get'
+    url: '/unselect-project',
+    method: 'put',
+    data: {
+      student: studentId,
+      project: projectId
+    }
   })
 }
 

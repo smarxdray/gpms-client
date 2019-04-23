@@ -27,6 +27,13 @@ export function getUserByToken(token) {
   })
 }
 
+export function getUserDetail(id) {
+  return request({
+    url: `/users/${id}/detail`,
+    method: 'get'
+  })
+}
+
 export function addUser(user) {
   return request({
     url: '/users',
@@ -45,54 +52,45 @@ export function updateUser(user) {
 
 export function deleteUser(id) {
   return request({
-    url: '/users',
-    method: 'delete',
-    params: {
-      id
-    }
+    url: `/users/${id}`,
+    method: 'delete'
+  })
+}
+
+export function getAdmins() {
+  return request({
+    url: '/users/admins',
+    method: 'get'
   })
 }
 
 export function getTeachers() {
   return request({
-    url: '/users',
-    method: 'get',
-    params: {
-      type: 'teacher'
-    }
+    url: '/users/teachers',
+    method: 'get'
   })
 }
 
 export function getStudents() {
   return request({
-    url: '/users',
-    method: 'get',
-    params: {
-      type: 'student'
-    }
-  })
-}
-
-export function getStudentDetail(studentId) {
-  return request({
-    url: `/users/students/details/${studentId}`,
+    url: '/users/students',
     method: 'get'
   })
 }
 
 export function getStudentsWithoutTeacher() {
   return request({
-    url: '/students',
+    url: '/users/students',
     method: 'get',
     params: {
-      allotted: 0
+      assigned: 0
     }
   })
 }
 
 export function getStudentsByTeacher(teacherId) {
   return request({
-    url: '/students',
+    url: '/users/students',
     method: 'get',
     params: {
       teacher: teacherId
@@ -101,7 +99,7 @@ export function getStudentsByTeacher(teacherId) {
 }
 export function getStudentDetailsByTeacher(teacherId) {
   return request({
-    url: '/students/details',
+    url: '/users/students/details',
     method: 'get',
     params: {
       teacher: teacherId
@@ -124,7 +122,7 @@ export function getTeacherDetail(teacherId) {
     url: '/users/teachers/details',
     method: 'get',
     params: {
-      id: teacherId
+      owner: teacherId
     }
   })
 }
@@ -146,8 +144,8 @@ export function getTeachersByQuery(listQuery) {
   let projectStatus = listQuery.projectStatus == '' ? null : listQuery.projectStatus;
   return request({
     url: '/users/teachers',
-    method: 'post',
-    data: {
+    method: 'get',
+    params: {
       name,
       college,
       major,
