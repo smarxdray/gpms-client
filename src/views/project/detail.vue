@@ -38,7 +38,6 @@ export default {
   },
   created() {
       const id = this.$route.params && this.$route.params.id;
-      console.log(this.$route.params)
       this.fetchData(id);
       this.tempRoute = Object.assign({}, this.$route);
   },
@@ -47,10 +46,6 @@ export default {
       getProjectById(id).then(response => {
         let payload = response.data;
         this.postForm = payload.data;
-        // Just for test
-        // this.postForm.title += `   Article Id:${this.postForm.id}`;
-        // this.postForm.content_short += `   Article Id:${this.postForm.id}`;
-        // Set tagsview title
         this.setTagsViewTitle();
       })
       .catch(err => {

@@ -35,6 +35,11 @@
             >{{ scope.row.status | statusFilter(statusList)}}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column width="150px" align="center" label="认领学生">
+          <template slot-scope="scope">
+            <span>{{ scope.row.studentName }}</span>
+          </template>
+        </el-table-column>
 
         <el-table-column align="center" label="Operations">
           <template slot-scope="scope">
@@ -60,7 +65,7 @@
               type="primary"
               size="small"
               v-if="isStudent && !canUnselect(scope.row)"
-              :disabled="detail.project != null"
+              :disabled="detail.project != null || scope.row.student != null"
               @click="handleSelect(scope.row)"
             >选择</el-button>
             <el-button
@@ -86,9 +91,10 @@
 
 <script>
 import { fetchList } from "@/api/article";
-import { getUserDetail } from "@/api/user";
+import { getUserById, getUserDetail } from "@/api/user";
 import { getNotices, pullUnreadNotices } from "@/api/notice";
 import {
+  getProjects,
   getProjectsByTeacher,
   addProjects,
   updateProjectsByTeacher,
@@ -96,6 +102,7 @@ import {
 } from "@/api/project";
 import { selectProject, unselectProject } from "@/api/transaction";
 import Pagination from "@/components/Pagination"; // Secondary package based on el-pagination
+import { resolve, reject } from 'q';
 
 export default {
   name: "ArticleList",
@@ -113,6 +120,7 @@ export default {
   data() {
     return {
       list: [],
+      userList: [],
       total: 0,
       listLoading: true,
       listQuery: {
@@ -199,11 +207,6 @@ export default {
       }
     }
   },
-  watch: {
-    list(newVal, oldVal) {
-      localStorage[this.key] = JSON.stringify(this.list);
-    }
-  },
   methods: {
     handleEdit(scope) {
       this.$router.push({
@@ -261,9 +264,9 @@ export default {
     hasPermission(scope) {
       return this.isAdmin || (this.isTeacher && this.name == scope.row.author);
     },
-    async getList(teacherId) {
+    getList(teacherId) {
       this.listLoading = true
-      getProjectsByTeacher(teacherId).then(res => {
+      getProjects({teacher: teacherId}).then(res => {
           let body = res.data;
           let success = body.code == 200;
           if (!success) {

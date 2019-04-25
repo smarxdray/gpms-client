@@ -309,8 +309,12 @@ export default {
       getFilesByQuery
     },
     handleApprove(row) {
-      console.log(row)
-      updateProjectsByTeacher(row.basic.id, 11).then(res => {
+      let project = {
+        teacher: row.basic.id,
+        status: 11,
+        reviewer: this.$store.getters.user.id
+      }
+      updateProjectsByTeacher(project).then(res => {
         let success = res.data.code == 200
         if (success) this.$notify({
           message: '成功！',

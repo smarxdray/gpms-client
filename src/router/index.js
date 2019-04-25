@@ -180,7 +180,7 @@ export const asyncRoutes = [
         component: () => import('@/views/notice/create'),
         name: 'Notify',
         meta: {
-          title: '公告发布',
+          title: '通知发布',
           icon: 'edit'
         }
       }
@@ -196,7 +196,7 @@ export const asyncRoutes = [
         component: () => import('@/views/notice/list'),
         name: 'NoticeList',
         meta: {
-          title: '公告中心',
+          title: '通知中心',
           icon: 'message'
         }
       },
@@ -206,7 +206,7 @@ export const asyncRoutes = [
         component: () => import('@/views/notice/detail'),
         name: 'NoticeDetail',
         meta: {
-          title: '公告详情'
+          title: '通知详情'
         }
       },
       {
@@ -385,7 +385,7 @@ export const asyncRoutes = [
         meta: {
           title: '文件提交',
           icon: 'guide',
-          roles: ['student']
+          roles: ['admin', 'teacher', 'student']
         },
       }
     ]

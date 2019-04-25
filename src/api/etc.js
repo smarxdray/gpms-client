@@ -29,4 +29,4 @@ export function getRoles() {
       url: '/roles',
       method: 'get'
     })
-  }
+}

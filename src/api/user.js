@@ -141,7 +141,7 @@ export function getTeachersByQuery(listQuery) {
   let name = listQuery.name == '' ? null : listQuery.name;
   let college = listQuery.college == '' ? null : listQuery.college;
   let major = listQuery.major == '' ? null : listQuery.major;
-  let projectStatus = listQuery.projectStatus == '' ? null : listQuery.projectStatus;
+  let projectStatus = listQuery.projectStatus === '' ? null : listQuery.projectStatus;
   return request({
     url: '/users/teachers',
     method: 'get',
@@ -149,7 +149,7 @@ export function getTeachersByQuery(listQuery) {
       name,
       college,
       major,
-      projectStatus
+      'project-status': listQuery.projectStatus
     }
   })
 }

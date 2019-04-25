@@ -25,14 +25,19 @@ export function getProjectsByTeacher(teacherId) {
     })
 }
 
-export function updateProjectsByTeacher(teacherId, status) {
+export function getProjects(queryObj) {
+    return request({
+        url: '/projects',
+        method: 'get',
+        params: queryObj
+    })
+}
+
+export function updateProjectsByTeacher(project) {
     return request({
         url: '/projects',
         method: 'put',
-        data: {
-            teacher: teacherId,
-            status
-        }
+        data: project
     })
 }
 
