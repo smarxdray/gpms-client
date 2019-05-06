@@ -42,8 +42,8 @@
         {{ $t('login.logIn') }}
       </el-button>
 
-      <div style="position:relative">
-        <div class="tips">
+      <!-- <div style="position:relative"> -->
+        <!-- <div class="tips">
           <span>{{ $t('login.username') }} : admin</span>
           <span>{{ $t('login.password') }} : {{ $t('login.any') }}</span>
         </div>
@@ -57,7 +57,7 @@
         <el-button class="thirdparty-button" type="primary" @click="showDialog=true">
           {{ $t('login.thirdparty') }}
         </el-button>
-      </div>
+      </div> -->
     </el-form>
 
     <el-dialog :title="$t('login.thirdparty')" :visible.sync="showDialog">
@@ -82,18 +82,18 @@ export default {
   components: { LangSelect, SocialSign },
   data() {
     const validateUsername = (rule, value, callback) => {
-      // if (!validUsername(value)) {
-        // callback(new Error('Please enter the correct user name'))
-      // } else {
+      if (!validUsername(value)) {
+        callback(new Error('Please enter the correct user name'))
+      } else {
         callback()
-      // }
+      }
     }
     const validatePassword = (rule, value, callback) => {
-      // if (value.length < 6) {
-        // callback(new Error('The password can not be less than 6 digits'))
-      // } else {
+      if (value.length < 3) {
+        callback(new Error('The password can not be less than 6 digits'))
+      } else {
         callback()
-      // }
+      }
     }
     return {
       loginForm: {
@@ -135,7 +135,7 @@ export default {
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
-        // if (valid) {
+        if (valid) {
           this.loading = true
           this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
             this.loading = false
@@ -148,10 +148,10 @@ export default {
           }).catch(() => {
             this.loading = false
           })
-        // } else {
-          // console.log('error submit!!')
-          // return false
-        // }
+        } else {
+          console.log('error submit!!')
+          return false
+        }
       })
     }, //连接
     socketConnect() {

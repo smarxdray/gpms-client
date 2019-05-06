@@ -270,6 +270,7 @@ export default {
     getList() {
       this.listLoading = true
       getTeachersByQuery(this.listQuery).then(res => {
+        console.log(res)
         let body = res.data;
         this.list = body.data;
         // this.total = response.data.total

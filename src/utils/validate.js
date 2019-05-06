@@ -7,8 +7,9 @@ export function isExternal(path) {
 }
 
 export function validUsername(str) {
-  const valid_map = ['admin', 'teacher', 'editor', 'student']
-  return valid_map.indexOf(str.trim()) >= 0
+  // const valid_map = ['admin', 'teacher', 'editor', 'student']
+  // return valid_map.indexOf(str.trim()) >= 0
+  return str != null && str != '' && str.length > 0; 
 }
 
 /* 合法uri*/

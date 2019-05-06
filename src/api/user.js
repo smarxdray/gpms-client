@@ -149,7 +149,7 @@ export function getTeachersByQuery(listQuery) {
       name,
       college,
       major,
-      'project-status': listQuery.projectStatus
+      'project-status': projectStatus
     }
   })
 }
